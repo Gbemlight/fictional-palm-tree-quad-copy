@@ -2,7 +2,7 @@
 
 export const mockUser = {
   id: "user_001",
-  name: "Sadiq Ibrahim",
+  name: "Sadiq Ahmad",
   email: "sadiq@example.com",
   phone: "+2348012345678",
   walletBalance: 125000,
