@@ -1,11 +1,22 @@
+// ================= TYPES =================
+
+export type TransactionStatus = "success" | "pending" | "failed";
+
+export type TransactionType =
+  | "airtime"
+  | "data"
+  | "electricity"
+  | "tv";
+
 // ================= USER =================
 
 export const mockUser = {
   id: "user_001",
   name: "Sadiq Ahmad",
-  email: "sadiq@example.com",
+  email: "sadiq@quickpay.app",
   phone: "+2348012345678",
-  walletBalance: 135000,
+  walletBalance: 125000,
+  currency: "NGN",
 };
 
 // ================= TRANSACTIONS =================
@@ -13,26 +24,29 @@ export const mockUser = {
 export const mockTransactions = [
   {
     id: "txn_001",
-    type: "airtime",
+    type: "airtime" as TransactionType,
     amount: 2000,
-    status: "success",
+    status: "success" as TransactionStatus,
     provider: "MTN",
+    reference: "QKP-982134",
     date: "2026-02-20",
   },
   {
     id: "txn_002",
-    type: "electricity",
+    type: "electricity" as TransactionType,
     amount: 15000,
-    status: "success",
+    status: "success" as TransactionStatus,
     provider: "PHCN",
+    reference: "QKP-982135",
     date: "2026-02-19",
   },
   {
     id: "txn_003",
-    type: "data",
+    type: "data" as TransactionType,
     amount: 5000,
-    status: "pending",
+    status: "pending" as TransactionStatus,
     provider: "Airtel",
+    reference: "QKP-982136",
     date: "2026-02-18",
   },
 ];
@@ -41,6 +55,7 @@ export const mockTransactions = [
 
 export const serviceProviders = {
   airtime: ["MTN", "Airtel", "Glo", "9mobile"],
+  data: ["MTN", "Airtel", "Glo", "9mobile"],
   tv: ["DSTV", "GOTV"],
   electricity: ["PHCN"],
 };
@@ -49,37 +64,39 @@ export const serviceProviders = {
 
 export const dataPlans = [
   {
-    id: "data_1",
+    id: "data_001",
     provider: "MTN",
-    plan: "1GB - 30 Days",
+    name: "1GB - 30 Days",
     price: 1000,
   },
   {
-    id: "data_2",
+    id: "data_002",
     provider: "Airtel",
-    plan: "2GB - 30 Days",
+    name: "2GB - 30 Days",
     price: 2000,
   },
   {
-    id: "data_3",
+    id: "data_003",
     provider: "Glo",
-    plan: "5GB - 30 Days",
+    name: "5GB - 30 Days",
     price: 3500,
   },
 ];
 
-// ================= SAVED BENEFICIARIES =================
+// ================= BENEFICIARIES =================
 
 export const savedBeneficiaries = [
   {
     id: "ben_001",
     name: "Mum",
+    type: "airtime",
     phone: "+2348098765432",
     provider: "MTN",
   },
   {
     id: "ben_002",
-    name: "John Electricity",
+    name: "Home Electricity",
+    type: "electricity",
     meterNumber: "12345678901",
     provider: "PHCN",
   },
