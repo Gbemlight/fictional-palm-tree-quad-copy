@@ -1,24 +1,35 @@
 "use client";
 
-import { Skeleton, SkeletonCard, SkeletonText } from "@/components/ui/skeleton";
+import { Sidebar } from "@/components/dashboard/sidebar";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#000000] p-10 flex items-center justify-center">
-      <div className="w-full max-w-xl space-y-6">
-        <SkeletonCard />
+    <div className="flex min-h-screen bg-[#000000]/80">
+      {/* Sidebar */}
+      <Sidebar />
 
-        <div className="rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur">
-          <Skeleton variant="text" height={18} className="w-1/3" />
-          <div className="mt-4">
-            <SkeletonText lines={4} />
+      {/* Main Content */}
+      <main className="flex-1 p-10 text-white">
+        <h1 className="text-3xl font-bold mb-4">QuickPay Dashboard</h1>
+
+        <p className="text-white/70">
+          This is a preview of the dashboard layout.
+        </p>
+
+        <div className="mt-8 grid grid-cols-3 gap-6">
+          <div className="rounded-2xl bg-white/10 backdrop-blur border border-white/15 p-6">
+            Card 1
           </div>
-          <div className="mt-6 flex items-center gap-4">
-            <Skeleton variant="avatar" width={36} height={36} />
-            <Skeleton variant="rectangle" height={12} className="w-1/4" />
+
+          <div className="rounded-2xl bg-white/10 backdrop-blur border border-white/15 p-6">
+            Card 2
+          </div>
+
+          <div className="rounded-2xl bg-white/10 backdrop-blur border border-white/15 p-6">
+            Card 3
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
