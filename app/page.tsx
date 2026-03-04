@@ -1,31 +1,23 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Info } from "lucide-react";
+import { Skeleton, SkeletonCard, SkeletonText } from "@/components/ui/skeleton";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#000000] p-10">
-      <div className="flex flex-wrap gap-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 p-8">
-        <Badge variant="success" dot icon={<CheckCircle2 className="h-4 w-4" />}>
-          Success
-        </Badge>
+    <main className="min-h-screen bg-[#000000] p-10 flex items-center justify-center">
+      <div className="w-full max-w-xl space-y-6">
+        <SkeletonCard />
 
-        <Badge variant="pending" dot>
-          Pending
-        </Badge>
-
-        <Badge variant="failed" dot icon={<XCircle className="h-4 w-4" />}>
-          Failed
-        </Badge>
-
-        <Badge variant="info" size="sm" icon={<Info className="h-4 w-4" />}>
-          Info
-        </Badge>
-
-        <Badge variant="neutral" size="sm">
-          Neutral
-        </Badge>
+        <div className="rounded-2xl border border-white/15 bg-white/5 p-6 backdrop-blur">
+          <Skeleton variant="text" height={18} className="w-1/3" />
+          <div className="mt-4">
+            <SkeletonText lines={4} />
+          </div>
+          <div className="mt-6 flex items-center gap-4">
+            <Skeleton variant="avatar" width={36} height={36} />
+            <Skeleton variant="rectangle" height={12} className="w-1/4" />
+          </div>
+        </div>
       </div>
     </main>
   );
