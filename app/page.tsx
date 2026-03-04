@@ -1,47 +1,32 @@
 "use client";
 
-import * as React from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogBody,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, XCircle, Info } from "lucide-react";
 
 export default function Home() {
-  const [open, setOpen] = React.useState(false);
-
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[var(--gradient-purple-pink)] p-10">
-      <Dialog open={open} onOpenChange={setOpen} size="md" closeOnOverlayClick>
-        <DialogTrigger asChild>
-          <Button>Open Modal</Button>
-        </DialogTrigger>
+    <main className="min-h-screen flex items-center justify-center bg-[#000000] p-10">
+      <div className="flex flex-wrap gap-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 p-8">
+        <Badge variant="success" dot icon={<CheckCircle2 className="h-4 w-4" />}>
+          Success
+        </Badge>
 
-        <DialogHeader>
-          <DialogTitle>Confirm Action</DialogTitle>
-          <DialogDescription>
-            This dialog uses Radix focus trapping + Escape close.
-          </DialogDescription>
-        </DialogHeader>
+        <Badge variant="pending" dot>
+          Pending
+        </Badge>
 
-        <DialogBody>
-          <p className="text-white/80">
-            Glassmorphism content + blur overlay + spring animation.
-          </p>
-        </DialogBody>
+        <Badge variant="failed" dot icon={<XCircle className="h-4 w-4" />}>
+          Failed
+        </Badge>
 
-        <DialogFooter>
-          <Button variant="secondary" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={() => setOpen(false)}>Confirm</Button>
-        </DialogFooter>
-      </Dialog>
+        <Badge variant="info" size="sm" icon={<Info className="h-4 w-4" />}>
+          Info
+        </Badge>
+
+        <Badge variant="neutral" size="sm">
+          Neutral
+        </Badge>
+      </div>
     </main>
   );
 }
