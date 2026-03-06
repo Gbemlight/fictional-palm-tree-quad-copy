@@ -20,8 +20,10 @@ export default function BuyDataPaymentPage() {
   async function handleConfirm() {
     // Simulate payment
     await new Promise(res => setTimeout(res, 1200));
-    // Redirect after short delay
-    setTimeout(() => router.push("/dashboard?tab=transactions"), 1200);
+    // Redirect to success page with transaction details
+    setTimeout(() => {
+      router.push(`/buy-data/success?plan=${plan.id}&phone=${phone}&amount=${plan.price}&network=${network}&validity=${encodeURIComponent(validity)}&ref=QKP-982134&date=2026-02-20&status=success`);
+    }, 1200);
     return true;
   }
 
