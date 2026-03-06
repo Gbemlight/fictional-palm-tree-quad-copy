@@ -72,6 +72,10 @@ export default function BuyDataPage() {
       >
         Next
       </button>
+
+      <Link href="/buy-data/recipient" className="mt-6 w-full max-w-xs mx-auto block rounded-xl py-3 font-semibold text-lg bg-green-500 hover:bg-green-600 text-white text-center transition">
+        Recipient
+      </Link>
     </div>
   );
 }
