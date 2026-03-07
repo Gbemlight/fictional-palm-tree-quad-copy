@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Smartphone, CheckCircle2 } from "lucide-react";
+import { ContactPicker } from "@/components/payment/contact-picker";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -215,6 +216,10 @@ export default function BuyAirtimePage() {
                 />
               )}
             />
+            <div className="mt-4">
+              <ContactPicker 
+                onSelect={(phone) => setValue("phone", phone, { shouldValidate: true})} />
+            </div>
           </section>
 
           {/* Summary */}
