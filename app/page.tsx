@@ -1,11 +1,7 @@
 "use client";
 
-import BuyAirtimePage from "./buy-airtime/page";
+import PayBillsPage from "./pay-bills/page";
 
 export default function Home() {
-  return (
-    <main className="min-h-screen">
-      <BuyAirtimePage />
-    </main>
-  );
+  return <PayBillsPage />;
 }
