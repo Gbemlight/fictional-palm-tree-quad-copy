@@ -1,7 +1,7 @@
 "use client";
 
-import CablePage from "./pay-bills/cable/page";
+import InternetBundlesPage from "./pay-bills/internet/page";
 
 export default function Home() {
-  return <CablePage />;
+  return <InternetBundlesPage />;
 }
