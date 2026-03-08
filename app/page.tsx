@@ -1,7 +1,7 @@
 "use client";
 
-import ElectricityBillPage from "./pay-bills/electricity/page";
+import CablePage from "./pay-bills/cable/page";
 
 export default function Home() {
-  return <ElectricityBillPage />;
+  return <CablePage />;
 }
