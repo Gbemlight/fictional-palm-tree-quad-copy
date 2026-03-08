@@ -1,190 +1,414 @@
 "use client";
 
-import { useState } from "react";
-import { Dialog } from "@radix-ui/react-dialog";
-import { motion } from "framer-motion";
-import { toastSuccess } from "@/components/ui/toast";
-import { useClipboard } from "react-use-clipboard";
+import * as React from "react";
+import * as Dialog from "@radix-ui/react-dialog";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Wallet,
+  CreditCard,
+  Landmark,
+  Smartphone,
+  X,
+  CheckCircle2,
+  Copy,
+} from "lucide-react";
+
+function useClipboard(text: string, options?: { successDuration?: number }) {
+  const [copied, setCopied] = React.useState(false);
+
+  const copy = React.useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), options?.successDuration ?? 1500);
+    });
+  }, [text, options?.successDuration]);
+
+  return [copied, copy] as const;
+}
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toastSuccess, toastInfo } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
+
+type PaymentMethod = "card" | "bank" | "ussd";
+
+interface AddMoneyModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  currentBalance?: number;
+  onSuccess?: (amount: number) => void;
+}
 
 const QUICK_AMOUNTS = [1000, 5000, 10000, 20000];
 const MIN_AMOUNT = 100;
 const MAX_AMOUNT = 500000;
 
-const PAYMENT_METHODS = [
+const bankDetails = {
+  bankName: "Wema Bank",
+  accountNumber: "1234567890",
+  accountName: "QuickPay Technologies Ltd",
+};
+
+const methods = [
   {
-    id: "card",
+    id: "card" as PaymentMethod,
     name: "Debit Card",
-    description: "Pay securely with your debit card",
-    icon: (
-      <img src="/paystack-logo.png" alt="Paystack" className="w-8 h-8" />
-    ),
+    description: "Fund instantly using your bank card",
+    icon: <CreditCard className="h-5 w-5" />,
   },
   {
-    id: "bank",
+    id: "bank" as PaymentMethod,
     name: "Bank Transfer",
-    description: "Transfer to our account and get instant credit",
-    icon: (
-      <svg className="w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24"><rect width="24" height="24" rx="4" fill="#e0e7ff"/><path d="M6 19V9l6-4 6 4v10" stroke="#3b82f6" strokeWidth="2"/></svg>
-    ),
+    description: "Transfer to a dedicated account number",
+    icon: <Landmark className="h-5 w-5" />,
   },
   {
-    id: "ussd",
+    id: "ussd" as PaymentMethod,
     name: "USSD",
-    description: "Dial USSD code to pay from your phone",
-    icon: (
-      <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24"><rect width="24" height="24" rx="4" fill="#dcfce7"/><path d="M7 17l10-10M7 7h10v10" stroke="#22c55e" strokeWidth="2"/></svg>
-    ),
+    description: "Fund with your bank's USSD code",
+    icon: <Smartphone className="h-5 w-5" />,
   },
 ];
 
-const DUMMY_ACCOUNT = {
-  bank: "Fictional Bank",
-  accountNumber: "1234567890",
-  accountName: "Palm Tree Quad Ltd",
-};
-
-export function AddMoneyModal({ open, onOpenChange, onSuccess }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess?: (amount: number) => void;
-}) {
-  const [amount, setAmount] = useState(0);
-  const [step, setStep] = useState<"amount" | "method" | "success">("amount");
-  const [selectedMethod, setSelectedMethod] = useState<string>("");
-  const [copyAccount, setCopyAccount] = useClipboard(DUMMY_ACCOUNT.accountNumber, { successDuration: 2000 });
-  const [copyName, setCopyName] = useClipboard(DUMMY_ACCOUNT.accountName, { successDuration: 2000 });
-  const [loading, setLoading] = useState(false);
-
-  function handleAmountChange(val: number) {
-    setAmount(val);
-  }
-
-  function handleProceed() {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setStep("success");
-      onSuccess?.(amount);
-      toastSuccess("Wallet funded successfully!");
-    }, 2000);
-  }
-
-  function handleCopy(type: "account" | "name") {
-    if (type === "account") {
-      setCopyAccount();
-      toastSuccess("Account number copied!");
-    } else {
-      setCopyName();
-      toastSuccess("Account name copied!");
-    }
-  }
-
-  function reset() {
-    setAmount(0);
-    setStep("amount");
-    setSelectedMethod("");
-    onOpenChange(false);
-  }
+function ConfettiBurst() {
+  const pieces = Array.from({ length: 18 });
 
   return (
-    <Dialog open={open} onOpenChange={reset}>
-      <Dialog.Content className="bg-white dark:bg-[#18181b] rounded-xl p-6 w-full max-w-md mx-auto shadow-xl">
-        {step === "amount" && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <h2 className="text-xl font-bold mb-4">Add Money</h2>
-            <input
-              type="number"
-              min={MIN_AMOUNT}
-              max={MAX_AMOUNT}
-              value={amount || ""}
-              onChange={e => handleAmountChange(Number(e.target.value))}
-              className="w-full border rounded-lg px-4 py-2 text-lg mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-100 dark:bg-[#23232a] text-black dark:text-white"
-              placeholder="Enter amount (₦)"
-            />
-            <div className="flex gap-2 mb-4">
-              {QUICK_AMOUNTS.map(val => (
-                <button
-                  key={val}
-                  className="px-4 py-2 rounded-lg bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-semibold"
-                  onClick={() => handleAmountChange(val)}
-                >₦{val.toLocaleString()}</button>
-              ))}
-            </div>
-            <div className="text-xs text-gray-500 mb-2">Min ₦{MIN_AMOUNT}, Max ₦{MAX_AMOUNT}</div>
-            <button
-              className="w-full mt-2 py-3 rounded-lg bg-indigo-500 text-white font-bold text-lg disabled:bg-gray-300 disabled:text-gray-500"
-              disabled={amount < MIN_AMOUNT || amount > MAX_AMOUNT}
-              onClick={() => setStep("method")}
-            >Continue</button>
-          </motion.div>
-        )}
-        {step === "method" && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <h2 className="text-xl font-bold mb-4">Choose Payment Method</h2>
-            <div className="flex flex-col gap-4 mb-4">
-              {PAYMENT_METHODS.map(method => (
-                <label key={method.id} className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer ${selectedMethod === method.id ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900" : "border-gray-200 dark:border-gray-700 bg-white dark:bg-[#23232a]"}`}>
-                  {method.icon}
-                  <div className="flex-1">
-                    <div className="font-semibold text-lg">{method.name}</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">{method.description}</div>
-                  </div>
-                  <input
-                    type="radio"
-                    name="payment-method"
-                    checked={selectedMethod === method.id}
-                    onChange={() => setSelectedMethod(method.id)}
-                    className="accent-indigo-500"
-                  />
-                </label>
-              ))}
-            </div>
-            {selectedMethod === "bank" && (
-              <div className="bg-gray-100 dark:bg-[#23232a] rounded-lg p-4 mb-4">
-                <div className="font-semibold mb-2">Bank Transfer Details</div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm">Bank:</span>
-                  <span className="font-bold">{DUMMY_ACCOUNT.bank}</span>
-                </div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm">Account Number:</span>
-                  <span className="font-bold">{DUMMY_ACCOUNT.accountNumber}</span>
-                  <button className="ml-2 px-2 py-1 rounded bg-indigo-500 text-white text-xs" onClick={() => handleCopy("account")}>Copy</button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">Account Name:</span>
-                  <span className="font-bold">{DUMMY_ACCOUNT.accountName}</span>
-                  <button className="ml-2 px-2 py-1 rounded bg-indigo-500 text-white text-xs" onClick={() => handleCopy("name")}>Copy</button>
-                </div>
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      {pieces.map((_, i) => (
+        <motion.span
+          key={i}
+          className="absolute left-1/2 top-1/2 h-2 w-2 rounded-full"
+          style={{
+            background:
+              i % 4 === 0
+                ? "var(--color-primary)"
+                : i % 4 === 1
+                ? "var(--color-secondary)"
+                : i % 4 === 2
+                ? "var(--color-accent)"
+                : "var(--color-success)",
+          }}
+          initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+          animate={{
+            x: (Math.random() - 0.5) * 260,
+            y: (Math.random() - 0.5) * 220,
+            opacity: 0,
+            scale: 0.2,
+          }}
+          transition={{ duration: 0.9, ease: "easeOut" }}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function AddMoneyModal({
+  open,
+  onOpenChange,
+  currentBalance = 125000,
+  onSuccess,
+}: AddMoneyModalProps) {
+  const [amount, setAmount] = React.useState<number | "">("");
+  const [method, setMethod] = React.useState<PaymentMethod | "">("");
+  const [loading, setLoading] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
+  const [balance, setBalance] = React.useState(currentBalance);
+
+  const [copiedAccount, copyAccount] = useClipboard(bankDetails.accountNumber, {
+    successDuration: 1500,
+  });
+  const [copiedName, copyName] = useClipboard(bankDetails.accountName, {
+    successDuration: 1500,
+  });
+
+  const numericAmount = typeof amount === "number" ? amount : NaN;
+  const amountValid =
+    Number.isFinite(numericAmount) &&
+    numericAmount >= MIN_AMOUNT &&
+    numericAmount <= MAX_AMOUNT;
+
+  React.useEffect(() => {
+    if (copiedAccount) toastInfo("Account number copied");
+  }, [copiedAccount]);
+
+  React.useEffect(() => {
+    if (copiedName) toastInfo("Account name copied");
+  }, [copiedName]);
+
+  React.useEffect(() => {
+    if (!open) {
+      setLoading(false);
+      setSuccess(false);
+      setMethod("");
+      setAmount("");
+    }
+  }, [open]);
+
+  const handleChipClick = (value: number) => {
+    setAmount(value);
+  };
+
+  const handleProceed = async () => {
+    if (!amountValid || !method) return;
+
+    if (method === "card") {
+      setLoading(true);
+
+      setTimeout(() => {
+        setLoading(false);
+        setSuccess(true);
+        const newBalance = balance + numericAmount;
+        setBalance(newBalance);
+        onSuccess?.(numericAmount);
+        toastSuccess(`Wallet funded successfully with ₦${numericAmount.toLocaleString()}`);
+
+        setTimeout(() => {
+          onOpenChange(false);
+        }, 1800);
+      }, 2000);
+
+      return;
+    }
+
+    if (method === "ussd") {
+      toastInfo("USSD funding flow is coming soon");
+    }
+  };
+
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
+
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-3xl border border-white/15 bg-white/10 p-6 text-white backdrop-blur-xl outline-none md:p-8 max-h-[90vh] overflow-y-auto">
+          <AnimatePresence>
+            {success && <ConfettiBurst />}
+          </AnimatePresence>
+
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="rounded-2xl bg-white/10 p-3">
+                <Wallet className="h-6 w-6" />
               </div>
-            )}
-            {selectedMethod === "card" && (
+              <div>
+                <Dialog.Title className="text-2xl font-bold">
+                  Add Money
+                </Dialog.Title>
+                <Dialog.Description className="text-sm text-white/65">
+                  Fund your wallet securely using your preferred method.
+                </Dialog.Description>
+              </div>
+            </div>
+
+            <Dialog.Close asChild>
               <button
-                className="w-full py-3 rounded-lg bg-indigo-500 text-white font-bold text-lg mt-2 disabled:bg-gray-300 disabled:text-gray-500"
-                disabled={loading}
-                onClick={handleProceed}
-              >{loading ? "Processing..." : "Proceed"}</button>
-            )}
-            <button className="w-full mt-2 py-3 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold text-lg" onClick={reset}>Cancel</button>
-          </motion.div>
-        )}
-        {step === "success" && (
-          <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-            <div className="flex flex-col items-center justify-center py-8">
-              {/* Confetti animation placeholder */}
-              <div className="mb-4">
-                <svg width="64" height="64" fill="none" viewBox="0 0 64 64">
-                  <circle cx="32" cy="32" r="32" fill="#a5b4fc" />
-                  <path d="M32 16v32M16 32h32" stroke="#6366f1" strokeWidth="4" strokeLinecap="round" />
-                </svg>
-              </div>
-              <div className="text-2xl font-bold text-indigo-600 mb-2">Success!</div>
-              <div className="text-gray-500 mb-4">Your wallet has been funded.</div>
-              <button className="mt-4 px-6 py-3 rounded-lg bg-indigo-500 text-white font-bold text-lg" onClick={reset}>Close</button>
+                className="rounded-xl p-2 transition hover:bg-white/10"
+                aria-label="Close modal"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </Dialog.Close>
+          </div>
+
+          {/* Balance */}
+          <div className="mb-6 rounded-2xl border border-white/10 bg-black/20 p-4">
+            <p className="text-sm text-white/60">Current Balance</p>
+            <p className="mt-1 text-2xl font-bold">₦{balance.toLocaleString()}</p>
+          </div>
+
+          {/* Amount */}
+          <section className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+            <h3 className="mb-4 text-lg font-semibold">1. Enter amount</h3>
+
+            <div className="mb-4 flex flex-wrap gap-3">
+              {QUICK_AMOUNTS.map((chip) => {
+                const active = amount === chip;
+                return (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => handleChipClick(chip)}
+                    className={cn(
+                      "rounded-full px-4 py-2 text-sm font-medium transition",
+                      active
+                        ? "bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))] shadow-[0_10px_24px_rgba(124,58,237,0.28)]"
+                        : "border border-white/15 bg-white/5 hover:bg-white/10"
+                    )}
+                  >
+                    ₦{chip.toLocaleString()}
+                  </button>
+                );
+              })}
             </div>
-          </motion.div>
-        )}
-      </Dialog.Content>
-    </Dialog>
+
+            <Input
+              label="Amount"
+              type="number"
+              placeholder="Enter amount"
+              value={amount}
+              onChange={(e) =>
+                setAmount(e.target.value === "" ? "" : Number(e.target.value))
+              }
+              helperText={`Minimum ₦${MIN_AMOUNT.toLocaleString()} • Maximum ₦${MAX_AMOUNT.toLocaleString()}`}
+              state={
+                amount === ""
+                  ? "default"
+                  : amountValid
+                  ? "success"
+                  : "error"
+              }
+              errorMessage={
+                amount === ""
+                  ? undefined
+                  : !amountValid
+                  ? `Enter an amount between ₦${MIN_AMOUNT.toLocaleString()} and ₦${MAX_AMOUNT.toLocaleString()}`
+                  : undefined
+              }
+            />
+          </section>
+
+          {/* Methods */}
+          {amountValid && (
+            <section className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+              <h3 className="mb-4 text-lg font-semibold">2. Choose payment method</h3>
+
+              <div className="space-y-3">
+                {methods.map((item) => {
+                  const active = method === item.id;
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setMethod(item.id)}
+                      className={cn(
+                        "flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-all",
+                        active
+                          ? "border-transparent bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))] shadow-[0_12px_24px_rgba(236,72,153,0.22)]"
+                          : "border-white/10 bg-black/20 hover:bg-white/10"
+                      )}
+                    >
+                      <div className="rounded-xl bg-white/10 p-3">
+                        {item.icon}
+                      </div>
+
+                      <div className="flex-1">
+                        <p className="font-semibold">{item.name}</p>
+                        <p className="text-sm text-white/70">{item.description}</p>
+                      </div>
+
+                      <div
+                        className={cn(
+                          "h-5 w-5 rounded-full border-2",
+                          active ? "border-white bg-white/20" : "border-white/50"
+                        )}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* Bank transfer details */}
+          {amountValid && method === "bank" && (
+            <section className="mb-6 rounded-2xl border border-white/10 bg-black/20 p-5">
+              <h3 className="mb-4 text-lg font-semibold">Bank transfer details</h3>
+
+              <div className="space-y-4">
+                <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-sm text-white/60">Bank Name</p>
+                  <p className="mt-1 font-semibold">{bankDetails.bankName}</p>
+                </div>
+
+                <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-white/60">Account Number</p>
+                      <p className="mt-1 font-semibold">{bankDetails.accountNumber}</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      leftIcon={<Copy className="h-4 w-4" />}
+                      onClick={copyAccount}
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-white/60">Account Name</p>
+                      <p className="mt-1 font-semibold">{bankDetails.accountName}</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      leftIcon={<Copy className="h-4 w-4" />}
+                      onClick={copyName}
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Card proceed */}
+          {amountValid && method === "card" && (
+            <section className="mb-6 rounded-2xl border border-white/10 bg-black/20 p-5">
+              <h3 className="mb-2 text-lg font-semibold">Card payment</h3>
+              <p className="mb-4 text-sm text-white/70">
+                Your card will be charged instantly for ₦{numericAmount.toLocaleString()}.
+              </p>
+
+              <Button
+                type="button"
+                onClick={handleProceed}
+                loading={loading}
+                fullWidth
+              >
+                Proceed
+              </Button>
+            </section>
+          )}
+
+          {/* USSD */}
+          {amountValid && method === "ussd" && (
+            <section className="mb-6 rounded-2xl border border-white/10 bg-black/20 p-5">
+              <h3 className="mb-2 text-lg font-semibold">USSD Payment</h3>
+              <p className="text-sm text-white/70">
+                A USSD funding flow can be connected here for supported banks.
+              </p>
+            </section>
+          )}
+
+          {/* Success */}
+          {success && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="rounded-2xl border border-white/10 bg-[linear-gradient(135deg,var(--color-success),var(--color-accent))] p-5"
+            >
+              <div className="flex items-center gap-3">
+                <CheckCircle2 className="h-6 w-6" />
+                <div>
+                  <p className="font-semibold">Funding successful</p>
+                  <p className="text-sm text-white/90">
+                    Your wallet has been updated with ₦{numericAmount.toLocaleString()}.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
