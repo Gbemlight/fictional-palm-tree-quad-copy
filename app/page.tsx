@@ -13,12 +13,12 @@ export default function Home() {
         </h1>
 
         <p className="text-white/60">
-          Beneficiaries management preview
+          Transactions management preview
         </p>
 
-        <Link href="/wallet/beneficiaries">
+        <Link href="/transactions">
           <Button size="lg" leftIcon={<Users className="h-5 w-5" />}>
-            Open Beneficiaries Page
+            Open Transactions Page
           </Button>
         </Link>
       </div>
