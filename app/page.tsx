@@ -1,27 +1,26 @@
 "use client";
 
-import * as React from "react";
+import Link from "next/link";
+import { Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AddMoneyModal } from "@/components/wallet/add-money-modal";
 
-export default function Page() {
-  const [open, setOpen] = React.useState(false);
-  const [balance, setBalance] = React.useState(125000);
-
+export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#0f0f23] p-10">
-      <div className="rounded-3xl border border-white/15 bg-white/10 p-8 text-white backdrop-blur-xl">
-        <p className="mb-4 text-xl font-semibold">Wallet Balance</p>
-        <p className="mb-6 text-4xl font-bold">₦{balance.toLocaleString()}</p>
+    <main className="flex min-h-screen items-center justify-center bg-[#0f0f14]">
+      <div className="text-center space-y-6">
+        <h1 className="text-4xl font-bold text-white">
+          QuickPay UI Demo
+        </h1>
 
-        <Button onClick={() => setOpen(true)}>Add Money</Button>
+        <p className="text-white/60">
+          Beneficiaries management preview
+        </p>
 
-        <AddMoneyModal
-          open={open}
-          onOpenChange={setOpen}
-          currentBalance={balance}
-          onSuccess={(amount) => setBalance((prev) => prev + amount)}
-        />
+        <Link href="/wallet/beneficiaries">
+          <Button size="lg" leftIcon={<Users className="h-5 w-5" />}>
+            Open Beneficiaries Page
+          </Button>
+        </Link>
       </div>
     </main>
   );
