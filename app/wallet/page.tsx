@@ -7,6 +7,7 @@ import { toastSuccess } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { mockUser, mockTransactions } from "@/lib/dummy-data";
+import { AddMoneyModal } from "@/components/wallet/add-money-modal";
 
 const FILTERS = ["All", "Credit", "Debit", "Pending"];
 const DATE_RANGES = [
@@ -17,7 +18,7 @@ const DATE_RANGES = [
 
 function formatAmount(amount: number) {
   return `₦${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+// ...existing code...
 
 const tierColors: Record<string, string> = {
   Silver: "bg-gray-300 text-gray-700",
@@ -25,18 +26,87 @@ const tierColors: Record<string, string> = {
   Platinum: "bg-gradient-to-r from-blue-400 to-purple-500 text-white",
 };
 
-// Dummy wallet tier info
 const dummyWallet = {
   balance: mockUser.walletBalance,
   tier: "Silver",
-  tierProgress: 40_000, // e.g. amount spent
-  tierTarget: 100_000, // e.g. to next tier
+  tierProgress: 40000,
+  tierTarget: 100000,
   nextTier: "Gold",
 };
 
 export default function WalletPage() {
   const [balance, setBalance] = useState(0);
   const [displayedBalance, setDisplayedBalance] = useState(0);
+  const [filter, setFilter] = useState("All");
+  const [dateRange, setDateRange] = useState(DATE_RANGES[0].value);
+  const [transactions, setTransactions] = useState(mockTransactions);
+  const [customRange, setCustomRange] = useState({ from: "", to: "" });
+  const [showAddMoney, setShowAddMoney] = useState(false);
+
+  useEffect(() => {
+    setBalance(dummyWallet.balance);
+    let start = 0;
+    const end = dummyWallet.balance;
+    if (start === end) return;
+    let current = start;
+    const increment = (end - start) / 40;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= end) {
+        setDisplayedBalance(end);
+        clearInterval(timer);
+      } else {
+        setDisplayedBalance(current);
+      }
+    }, 20);
+    return () => clearInterval(timer);
+  }, []);
+
+  const filteredTxs = transactions.filter((tx: any) => {
+    if (filter === "Credit" && tx.type !== "credit") return false;
+    if (filter === "Debit" && tx.type !== "debit") return false;
+    if (filter === "Pending" && tx.status !== "pending") return false;
+    if (dateRange !== "custom") {
+      const days = typeof dateRange === "number" ? dateRange : 7;
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      return new Date(tx.date) >= cutoff;
+    } else if (customRange.from && customRange.to) {
+      return new Date(tx.date) >= new Date(customRange.from) && new Date(tx.date) <= new Date(customRange.to);
+    }
+    return true;
+  });
+
+  function handleExport() {
+    toastSuccess("Statement exported successfully!");
+  }
+
+  const tierProgress = Math.min(100, Math.round((dummyWallet.tierProgress / dummyWallet.tierTarget) * 100));
+
+  return (
+    <div className="w-full min-h-screen bg-[#000000]/80 text-white px-2 sm:px-4 md:px-8 py-4 flex flex-col gap-6">
+      <motion.div className="rounded-2xl p-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-lg w-full text-white">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex-1">
+            <div className="text-white text-lg font-medium mb-1">Wallet Balance</div>
+            <div className="text-4xl font-bold text-white">{formatAmount(displayedBalance)}</div>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <Badge className={tierColors[dummyWallet.tier as keyof typeof tierColors] + " px-3 py-1 text-sm font-semibold"}>{dummyWallet.tier} Tier</Badge>
+            <div className="w-28 mt-2">
+              <Progress value={tierProgress} />
+              <div className="text-xs text-white/80 mt-1">{tierProgress}% to {dummyWallet.nextTier}</div>
+            </div>
+            <button className="mt-2 px-4 py-2 rounded-lg bg-white text-indigo-600 font-semibold shadow hover:bg-indigo-100 transition" onClick={() => setShowAddMoney(true)}>Add Money</button>
+          </div>
+        </div>
+        <AddMoneyModal open={showAddMoney} onOpenChange={setShowAddMoney} onSuccess={amt => setBalance(b => b + amt)} />
+      </motion.div>
+    </div>
+  );
+}
+
+// ...existing code...
   const [filter, setFilter] = useState("All");
   const [dateRange, setDateRange] = useState(DATE_RANGES[0].value);
   const [transactions, setTransactions] = useState(mockTransactions);

@@ -2,49 +2,7 @@
 
 /* ================= DESIGN TOKENS ================= */
 
-/* Light theme (default) */
 :root {
-  --color-primary: #7c3aed;      /* purple */
-  --color-secondary: #ec4899;    /* pink */
-  --color-accent: #06b6d4;       /* cyan */
-  --color-success: #84cc16;      /* lime */
-  --color-warning: #f59e0b;      /* amber */
-  --color-danger: #ef4444;       /* red */
-
-  /* Gradients */
-  --gradient-purple-pink: linear-gradient(135deg, #7c3aed, #ec4899);
-  --gradient-cyan-purple: linear-gradient(135deg, #06b6d4, #7c3aed);
-  --gradient-lime-cyan: linear-gradient(135deg, #84cc16, #06b6d4);
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(124, 58, 237, 0.1);
-  --shadow-md: 0 4px 6px rgba(124, 58, 237, 0.15);
-  --shadow-lg: 0 10px 15px rgba(124, 58, 237, 0.2);
-  --shadow-xl: 0 20px 25px rgba(124, 58, 237, 0.25);
-
-/* Dark theme */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-primary: #a78bfa;      /* lighter purple */
-    --color-secondary: #f472b6;    /* lighter pink */
-    --color-accent: #22d3ee;       /* cyan */
-    --color-success: #bef264;      /* lime */
-    --color-warning: #fde68a;      /* amber */
-    --color-danger: #f87171;       /* red */
-
-    --gradient-purple-pink: linear-gradient(135deg, #a78bfa, #f472b6);
-    --gradient-cyan-purple: linear-gradient(135deg, #22d3ee, #a78bfa);
-    --gradient-lime-cyan: linear-gradient(135deg, #bef264, #22d3ee);
-
-    --shadow-sm: 0 1px 2px rgba(167, 139, 250, 0.12);
-    --shadow-md: 0 4px 6px rgba(167, 139, 250, 0.18);
-    --shadow-lg: 0 10px 15px rgba(167, 139, 250, 0.22);
-    --shadow-xl: 0 20px 25px rgba(167, 139, 250, 0.28);
-
-    background-color: #18181b;
-    color-scheme: dark;
-  }
-}
   /* Colors */
   --color-primary: #7c3aed;      /* purple */
   --color-secondary: #ec4899;    /* pink */
@@ -139,7 +97,4 @@
 body {
   font-family: Inter, system-ui, sans-serif;
   font-size: var(--text-body);
-  background: var(--color-primary, #18181b);
-  color: #f3f4f6;
-  transition: background 0.2s, color 0.2s;
 }
