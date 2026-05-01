@@ -4,10 +4,14 @@ import * as React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Tv, CheckCircle2, Loader2 } from "lucide-react";
+import { Tv, CheckCircle2, Loader2, Zap, Percent, ShieldCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { toastSuccess } from "@/components/ui/toast";
+import DashboardLayout from "@/components/dashboard/layout";
 import {
   Dialog,
   DialogHeader,
@@ -18,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { Select } from "@/components/ui/select";
-import { Switch } from "@radix-ui/react-switch";
+import * as SwitchPrimitive from "@radix-ui/react-switch";
 import { cn } from "@/lib/utils";
 
 /* ---------------- Packages ---------------- */
@@ -30,34 +34,65 @@ const packages = {
     { name: "Premium", price: 21000 },
   ],
   gotv: [
-    { name: "Jolli", price: 3950 },
-    { name: "Max", price: 5700 },
-    { name: "Supa", price: 7600 },
+    { name: "GOtv Supa+", price: 12500 },
+    { name: "GOtv Supa", price: 7600 },
+    { name: "GOtv Max", price: 5700 },
+    { name: "GOtv Jolli", price: 3950 },
+    { name: "GOtv Jinja", price: 2700 },
   ],
   startimes: [
-    { name: "Nova", price: 1700 },
-    { name: "Basic", price: 3200 },
     { name: "Classic", price: 5000 },
+    { name: "Basic", price: 3200 },
+    { name: "Nova", price: 1700 },
   ],
 };
 
-const providers = [
-  { id: "dstv", label: "DSTV" },
-  { id: "gotv", label: "GOTV" },
-  { id: "startimes", label: "Startimes" },
+const PROVIDERS = [
+  { 
+    id: "dstv", 
+    label: "DSTV",
+    logo: <span className="text-2xl font-black italic tracking-tighter">DStv</span>,
+    gradient: "from-[#0051A3] to-[#002D5C]",
+  },
+  { 
+    id: "gotv", 
+    label: "GOTV",
+    logo: <span className="text-2xl font-black italic tracking-tighter">GOtv</span>,
+    gradient: "from-[#009245] to-[#8dc63f]",
+  },
+  { 
+    id: "startimes", 
+    label: "Startimes",
+    logo: <span className="text-xl font-black tracking-tight">StarTimes</span>,
+    gradient: "from-[#E60000] to-[#990000]",
+  },
 ];
 
 /* ---------------- Validation ---------------- */
 
 const schema = z.object({
-  provider: z.string().min(1),
-  cardNumber: z.string().regex(/^\d{10}$/, "Card number must be 10 digits"),
-  package: z.string().min(1),
-  duration: z.number(),
+  provider: z.string().min(1, "Select a provider"),
+  cardNumber: z.string().regex(/^\d{10}$/, "Enter 10-digit IUC number"),
+  package: z.string().min(1, "Select a subscription plan"),
+  duration: z.number().min(1),
   autoRenew: z.boolean(),
 });
 
 type FormValues = z.infer<typeof schema>;
+
+function SummaryRow({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+      <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{label}</span>
+      <span className={cn(
+        "font-bold text-sm text-right max-w-[60%] truncate",
+        highlight ? "text-primary" : "text-white"
+      )}>
+        {value}
+      </span>
+    </div>
+  );
+}
 
 /* ---------------- Discounts ---------------- */
 
@@ -92,12 +127,18 @@ export default function CablePage() {
   const cardNumber = watch("cardNumber");
   const packageName = watch("package");
   const duration = watch("duration");
-  const autoRenew = watch("autoRenew");
 
   const [verifying, setVerifying] = React.useState(false);
   const [verified, setVerified] = React.useState(false);
   const [customer, setCustomer] = React.useState("");
   const [confirmOpen, setConfirmOpen] = React.useState(false);
+
+  // Reset dependent fields when provider changes
+  React.useEffect(() => {
+    setValue("package", "");
+    setVerified(false);
+    setCustomer("");
+  }, [provider, setValue]);
 
   const providerPackages = provider
     ? packages[provider as keyof typeof packages]
@@ -149,7 +190,7 @@ export default function CablePage() {
           </h2>
 
           <div className="grid grid-cols-3 gap-4">
-            {providers.map((p) => {
+            {PROVIDERS.map((p) => {
               const active = provider === p.id;
 
               return (
@@ -162,7 +203,7 @@ export default function CablePage() {
                   className={cn(
                     "rounded-2xl border p-4 transition",
                     active
-                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                      ? "bg-linear-to-r from-purple-500 to-pink-500 text-white"
                       : "border-white/20 text-white/80 hover:bg-white/10"
                   )}
                 >
@@ -276,10 +317,13 @@ export default function CablePage() {
               name="autoRenew"
               control={control}
               render={({ field }) => (
-                <Switch
+                <SwitchPrimitive.Root
                   checked={field.value}
                   onCheckedChange={field.onChange}
-                />
+                  className="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-white/20"
+                >
+                  <SwitchPrimitive.Thumb className="pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0" />
+                </SwitchPrimitive.Root>
               )}
             />
           </div>

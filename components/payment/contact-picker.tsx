@@ -1,13 +1,18 @@
 "use client";
 
 import * as React from "react";
-import * as Dialog from "@radix-ui/react-dialog";
-import { Search, X } from "lucide-react";
+import { Search, Users, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogHeader,
+  DialogTitle,
+  DialogBody,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-
 /* ---------- Types ---------- */
 
 type Contact = {
@@ -24,8 +29,11 @@ const CONTACTS: Contact[] = [
   { id: "1", name: "Amina Bello", phone: "08031234567", network: "MTN", group: "saved" },
   { id: "2", name: "Ibrahim Musa", phone: "08123456789", network: "Airtel", group: "saved" },
   { id: "3", name: "Sadiq Ahmad", phone: "09087654321", network: "Glo", group: "saved" },
-  { id: "4", name: "Fatima Ali", phone: "07045678901", network: "9mobile", group: "recent" },
+  { id: "4", name: "Fatima Ali", phone: "07045678901", network: "9mobile", group: "saved" },
   { id: "5", name: "Usman Lawal", phone: "08099887766", network: "MTN", group: "recent" },
+  { id: "6", name: "Bisi Akande", phone: "08022334455", network: "Airtel", group: "saved" },
+  { id: "7", name: "Chidi Okafor", phone: "08155667788", network: "Glo", group: "recent" },
+  { id: "8", name: "Zainab Haruna", phone: "09011223344", network: "MTN", group: "recent" },
 ];
 
 /* ---------- Helpers ---------- */
@@ -40,7 +48,7 @@ function initials(name: string) {
 }
 
 function sortAlpha(list: Contact[]) {
-  return [...list].sort((a, b) => a.name.localeCompare(b.name));
+  return [...list].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 }
 
 /* ---------- Component ---------- */
@@ -51,11 +59,11 @@ export function ContactPicker({
   onSelect: (phone: string) => void;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [tab, setTab] = React.useState<"saved" | "recent">("saved");
+  const [group, setGroup] = React.useState<"saved" | "recent">("saved");
   const [query, setQuery] = React.useState("");
 
   const filtered = React.useMemo(() => {
-    const base = CONTACTS.filter((c) => c.group === tab);
+    const base = CONTACTS.filter((c) => c.group === group);
 
     const q = query.trim().toLowerCase();
     const searched = !q
@@ -67,7 +75,7 @@ export function ContactPicker({
         );
 
     return sortAlpha(searched);
-  }, [tab, query]);
+  }, [group, query]);
 
   function handlePick(phone: string) {
     onSelect(phone);
@@ -75,77 +83,61 @@ export function ContactPicker({
   }
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={setOpen} size="md">
       {/* Trigger */}
-      <Dialog.Trigger asChild>
-        <Button variant="secondary" className="mt-2">
+      <DialogTrigger asChild>
+        <Button variant="secondary" size="sm" className="font-bold">
           Choose from contacts
         </Button>
-      </Dialog.Trigger>
+      </DialogTrigger>
 
-      <Dialog.Portal>
-        {/* Overlay */}
-        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
+      <DialogHeader>
+        <DialogTitle className="text-xl font-bold tracking-tight">
+          Choose Recipient
+        </DialogTitle>
+      </DialogHeader>
 
-        {/* Content */}
-        <Dialog.Content
-          className={cn(
-            "fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-lg -translate-x-1/2 -translate-y-1/2",
-            "rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl shadow-2xl",
-            "text-white outline-none"
-          )}
-        >
-          {/* Header */}
-          <div className="mb-4 flex items-center justify-between">
-            <Dialog.Title className="text-lg font-semibold">
-              Choose recipient
-            </Dialog.Title>
-
-            <Dialog.Close asChild>
+      <DialogBody>
+        <div className="space-y-6">
+          {/* Category Tabs */}
+          <div className="flex gap-2">
+            {[
+              { id: "saved", label: "Saved", icon: <Users className="h-4 w-4" /> },
+              { id: "recent", label: "Recent", icon: <History className="h-4 w-4" /> },
+            ].map((t) => (
               <button
-                aria-label="Close"
-                className="rounded-lg p-2 hover:bg-white/10 transition"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </Dialog.Close>
-          </div>
-
-          {/* Search */}
-          <div className="relative mb-4">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60" />
-            <Input
-              placeholder="Search name or number"
-              className="pl-9"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
-
-          {/* Tabs */}
-          <div className="mb-4 flex gap-2">
-            {(["saved", "recent"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
+                key={t.id}
+                onClick={() => {
+                  setGroup(t.id as "saved" | "recent");
+                  setQuery("");
+                }}
                 className={cn(
-                  "rounded-full px-4 py-1.5 text-sm font-medium transition",
-                  tab === t
-                    ? "bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))]"
-                    : "bg-white/10 hover:bg-white/20"
+                  "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold transition-all",
+                  group === t.id
+                    ? "bg-linear-to-br from-primary to-secondary text-white shadow-lg"
+                    : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
                 )}
               >
-                {t === "saved" ? "Saved" : "Recent"}
+                {t.icon}
+                {t.label}
               </button>
             ))}
           </div>
 
+          {/* Search */}
+          <Input
+            placeholder={`Search ${group} recipients...`}
+            leftIcon={<Search className="h-4 w-4" />}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+
           {/* Contact List */}
-          <div className="max-h-[340px] space-y-2 overflow-y-auto pr-1">
+          <div className="max-h-95 space-y-2 overflow-y-auto pr-2 scrollbar-hide">
             {filtered.length === 0 ? (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
+              <div className="rounded-2xl border border-white/5 bg-white/5 p-8 text-center animate-in fade-in zoom-in-95 duration-300">
                 <p className="text-sm text-white/70">
-                  No contacts found.
+                  {query ? `No contacts found for "${query}"` : `No ${group} recipients yet`}
                 </p>
               </div>
             ) : (
@@ -153,18 +145,20 @@ export function ContactPicker({
                 <button
                   key={contact.id}
                   onClick={() => handlePick(contact.phone)}
-                  className="flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/5 p-3 text-left transition hover:bg-white/10"
+                  className="group/contact flex w-full items-center gap-4 rounded-2xl border border-white/5 bg-white/5 p-3 text-left transition-all hover:bg-white/10 hover:border-white/10 active:scale-[0.98] animate-in fade-in slide-in-from-bottom-1"
                 >
                   {/* Avatar */}
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))] text-sm font-bold">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-secondary text-sm font-black text-white shadow-lg">
                     {initials(contact.name)}
                   </div>
 
                   {/* Info */}
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{contact.name}</p>
-                    <p className="text-xs text-white/60">
-                      {contact.phone}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-white leading-none mb-1 truncate group-hover/contact:text-primary transition-colors">
+                      {contact.name}
+                    </p>
+                    <p className="text-xs font-medium text-white/50">
+                      {contact.phone.replace(/(\d{3})(\d{4})(\d{4})/, "$1 $2 $3")}
                     </p>
                   </div>
 
@@ -176,8 +170,8 @@ export function ContactPicker({
               ))
             )}
           </div>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+        </div>
+      </DialogBody>
+    </Dialog>
   );
 }

@@ -18,12 +18,27 @@ export default function BuyDataPaymentPage() {
   const validity = plan.name.match(/(\d+\s*Days)/)?.[1] || "30 Days";
 
   async function handleConfirm() {
-    // Simulate payment
-    await new Promise(res => setTimeout(res, 1200));
-    // Redirect to success page with transaction details
+    // 1. Simulate the background payment processing
+    await new Promise(res => setTimeout(res, 1500));
+    
+    // 2. Prepare the transaction details for the Success Page
+    const ref = `QKP-${Math.floor(100000 + Math.random() * 900000)}`;
+    const params = new URLSearchParams({
+      ref,
+      plan: planId,
+      phone,
+      amount: plan.price.toString(),
+      network,
+      validity,
+      date: new Date().toISOString().split("T")[0],
+      status: "success"
+    });
+
+    // 3. Redirect to the Purchase Successful page after the Modal's success animation plays
     setTimeout(() => {
-      router.push(`/buy-data/success?plan=${plan.id}&phone=${phone}&amount=${plan.price}&network=${network}&validity=${encodeURIComponent(validity)}&ref=QKP-982134&date=2026-02-20&status=success`);
-    }, 1200);
+      router.push(`/buy-data/success?${params.toString()}`);
+    }, 2500); // This delay aligns with the modal's 2.2s success state
+
     return true;
   }
 

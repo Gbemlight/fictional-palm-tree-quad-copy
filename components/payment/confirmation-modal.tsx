@@ -2,9 +2,11 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
-import { CheckCircleIcon } from "@heroicons/react/24/solid";
-import { cn } from "../../lib/utils";
+import * as React from "react";
+import { CheckCircle2, Wallet, CreditCard, Landmark, Smartphone, X, Zap } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { toastError } from "@/components/ui/toast";
 
 interface ConfirmationModalProps {
   open: boolean;
@@ -20,40 +22,63 @@ interface ConfirmationModalProps {
   onConfirm: () => Promise<boolean>;
 }
 
-const paymentMethods = [
-  { key: "wallet", label: "Wallet Balance" },
-  { key: "card", label: "Card" },
-  { key: "bank", label: "Bank Transfer" },
+const methods = [
+  { id: "wallet", label: "Wallet", icon: <Wallet className="h-4 w-4" /> },
+  { id: "card", label: "Card", icon: <CreditCard className="h-4 w-4" /> },
+  { id: "bank", label: "Bank", icon: <Landmark className="h-4 w-4" /> },
 ];
 
-export function ConfirmationModal({ open, onOpenChange, summary, onConfirm }: ConfirmationModalProps) {
-  const [method, setMethod] = useState("wallet");
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
-  const [showToast, setShowToast] = useState(false);
+function ConfettiBurst() {
+  const pieces = Array.from({ length: 20 });
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden z-50">
+      {pieces.map((_, i) => (
+        <motion.span
+          key={i}
+          className="absolute left-1/2 top-1/2 h-2 w-2 rounded-full"
+          style={{
+            background: i % 3 === 0 ? "var(--color-primary)" : i % 3 === 1 ? "var(--color-secondary)" : "var(--color-accent)",
+          }}
+          initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+          animate={{
+            x: (Math.random() - 0.5) * 400,
+            y: (Math.random() - 0.5) * 300 - 100,
+            opacity: 0,
+            scale: 0.2,
+          }}
+          transition={{ duration: 1.2, ease: "easeOut" }}
+        />
+      ))}
+    </div>
+  );
+}
+
+export function ConfirmationModal({ 
+  open, 
+  onOpenChange, 
+  summary, 
+  onConfirm 
+}: ConfirmationModalProps) {
+  const [method, setMethod] = React.useState("wallet");
+  const [loading, setLoading] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
 
   const canAfford = summary.walletBalance >= summary.amount;
 
   async function handleConfirm() {
-    setLoading(true);
-    setError("");
     if (method === "wallet" && !canAfford) {
-      setError("Insufficient wallet balance");
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 2500);
-      setLoading(false);
+      toastError("Insufficient wallet balance. Please fund your wallet.");
       return;
     }
+
+    setLoading(true);
     const ok = await onConfirm();
+    
     if (ok) {
       setSuccess(true);
-      setTimeout(() => {
-        onOpenChange(false);
-        setSuccess(false);
-      }, 1800);
+      setTimeout(() => onOpenChange(false), 2200);
     } else {
-      setError("Payment failed. Try again.");
+      toastError("Transaction failed. Please try again.");
     }
     setLoading(false);
   }
@@ -61,125 +86,128 @@ export function ConfirmationModal({ open, onOpenChange, summary, onConfirm }: Co
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/60 z-40" />
-        <Dialog.Content
-          className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-[#23232a] p-6 shadow-xl focus:outline-none text-white"
-          onPointerDownOutside={e => e.preventDefault()}
-        >
-          {/* Accessibility: Dialog.Title required by Radix UI */}
+        <Dialog.Overlay className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" />
+        <Dialog.Content asChild onPointerDownOutside={(e) => e.preventDefault()}>
+          <div className="fixed inset-0 z-50 overflow-y-auto outline-none">
+            <div className="flex min-h-full items-center justify-center p-4 py-8 md:py-16">
+              <div className="relative w-full max-w-md rounded-[2.5rem] border border-white/20 bg-neutral-900/90 p-8 shadow-2xl backdrop-blur-2xl focus:outline-none text-white">
+          <AnimatePresence>
+            {success && <ConfettiBurst />}
+          </AnimatePresence>
+
           <Dialog.Title asChild>
             <h2 className="sr-only">Confirm Purchase</h2>
           </Dialog.Title>
-          {/* Toast for insufficient balance */}
-          {showToast && (
-            <div className="fixed left-1/2 top-8 z-[100] -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg font-semibold animate-fade-in-out">
-              Insufficient wallet balance
-            </div>
-          )}
+
           <AnimatePresence>
             {success ? (
               <motion.div
                 key="success"
-                initial={{ scale: 0.7, opacity: 0 }}
+                initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.7, opacity: 0 }}
-                className="flex flex-col items-center justify-center min-h-[300px]"
+                className="flex flex-col items-center justify-center min-h-75"
               >
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  className="mb-4"
-                >
-                  <CheckCircleIcon className="w-20 h-20 text-green-400" />
-                </motion.div>
-                <motion.h2
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-2xl font-bold mb-2"
-                >
-                  Payment Successful!
-                </motion.h2>
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-lg text-white/80"
-                >
-                  Redirecting to transactions...
-                </motion.p>
-                {/* Confetti animation could be added here with a library if desired */}
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 bg-green-500/30 blur-3xl rounded-full" />
+                  <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-green-500 text-white shadow-lg shadow-green-500/20">
+                    <CheckCircle2 className="h-14 w-14" />
+                  </div>
+                </div>
+                <h2 className="text-3xl font-black text-center mb-2 tracking-tight">Payment Successful!</h2>
+                <p className="text-white/60 font-medium text-center">Finalizing your purchase...</p>
               </motion.div>
             ) : (
               <motion.div
                 key="content"
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.95, opacity: 0 }}
               >
-                <div className="flex items-center gap-3 mb-4">
-                  {/* Service icon placeholder */}
-                  <div className="w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-2xl font-bold text-white">
-                    {summary.network[0]}
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary via-secondary to-accent shadow-lg text-2xl font-black text-white">
+                    {summary.network.charAt(0)}
                   </div>
-                  <div>
-                    <h2 className="text-xl font-bold">Confirm Purchase</h2>
+                  <div className="min-w-0">
+                    <h2 className="text-2xl font-black tracking-tight leading-none mb-1">Confirm Purchase</h2>
+                    <p className="text-sm font-bold text-white/40 uppercase tracking-widest">{summary.network} Network</p>
                   </div>
                 </div>
-                <div className="space-y-2 mb-4">
+
+                <div className="space-y-1 mb-8 rounded-3xl border border-white/5 bg-white/5 p-4">
                   <SummaryRow label="Network" value={summary.network} />
                   <SummaryRow label="Plan" value={summary.plan} />
                   <SummaryRow label="Phone Number" value={summary.phone.replace(/(\d{3})(\d{4})(\d{4})/, "$1 $2 $3")} />
                   <SummaryRow label="Amount" value={`₦${summary.amount.toLocaleString()}`} />
                   <SummaryRow label="Validity" value={summary.validity} />
                 </div>
-                <div className="mb-4">
-                  <div className="font-semibold mb-1">Payment Method</div>
-                  <div className="flex gap-2">
-                    {paymentMethods.map(pm => (
+
+                <div className="mb-8">
+                  <div className="text-xs font-black uppercase tracking-widest text-white/40 mb-3 ml-1">Payment Method</div>
+                  <div className="grid grid-cols-3 gap-3">
+                    {methods.map(pm => (
                       <button
-                        key={pm.key}
-                        className={cn(
-                          "px-3 py-2 rounded-lg border text-sm font-semibold transition",
-                          method === pm.key
-                            ? "bg-indigo-500 text-white border-indigo-500"
-                            : "bg-[#18181b] text-white/80 border-white/10 hover:bg-indigo-600/30"
-                        )}
-                        onClick={() => setMethod(pm.key)}
+                        key={pm.id}
                         type="button"
-                        tabIndex={0}
+                        className={cn(
+                          "flex flex-col items-center gap-2 rounded-2xl border p-3 transition-all",
+                          method === pm.id
+                            ? "border-primary bg-primary/20 text-white shadow-lg shadow-primary/10"
+                            : "border-white/10 bg-white/5 text-white/60 hover:border-white/20"
+                        )}
+                        onClick={() => setMethod(pm.id)}
                       >
+                        {pm.icon}
                         {pm.label}
                       </button>
                     ))}
                   </div>
+                  
                   {method === "wallet" && (
-                    <div className="mt-2 text-sm text-white/70">
-                      Wallet Balance: <span className={canAfford ? "text-green-400" : "text-red-400"}>₦{summary.walletBalance.toLocaleString()}</span>
-                    </div>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 flex items-center justify-between rounded-xl bg-black/40 px-3 py-2 border border-white/5"
+                    >
+                      <span className="text-xs font-bold text-white/40 uppercase tracking-widest">Balance</span>
+                      <span className={cn(
+                        "text-sm font-black",
+                        canAfford ? "text-green-400" : "text-red-400"
+                      )}>
+                        ₦{summary.walletBalance.toLocaleString()}
+                      </span>
+                    </motion.div>
                   )}
                 </div>
-                {error && <div className="mb-2 text-red-500 text-sm">{error}</div>}
-                <div className="flex gap-3 mt-6">
-                  <button
-                    className="flex-1 py-3 rounded-xl font-semibold text-lg bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg hover:from-indigo-600 hover:to-purple-600 transition"
+
+                <div className="flex flex-col gap-3">
+                  <Button
+                    fullWidth
+                    size="xl"
+                    className="rounded-[1.25rem] shadow-xl shadow-primary/20"
                     onClick={handleConfirm}
                     disabled={loading}
-                    type="button"
+                    loading={loading}
+                    rightIcon={<Zap className="h-5 w-5 fill-current" />}
                   >
-                    {loading ? "Processing..." : "Confirm Payment"}
-                  </button>
+                    Confirm & Pay
+                  </Button>
+                  
                   <Dialog.Close asChild>
-                    <button
-                      className="flex-1 py-3 rounded-xl font-semibold text-lg bg-white/10 text-white hover:bg-white/20 transition border border-white/10"
-                      type="button"
+                    <Button
+                      variant="ghost"
+                      fullWidth
                       disabled={loading}
+                      className="text-white/40 hover:text-red-400 transition-colors"
                     >
                       Cancel
-                    </button>
+                    </Button>
                   </Dialog.Close>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
+              </div>
+            </div>
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
@@ -188,9 +216,11 @@ export function ConfirmationModal({ open, onOpenChange, summary, onConfirm }: Co
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between items-center text-base">
-      <span className="text-gray-300">{label}</span>
-      <span className="font-semibold text-white drop-shadow-sm break-all text-right max-w-[60%]">{value}</span>
+    <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">{label}</span>
+      <span className="font-bold text-sm text-white text-right max-w-[60%] truncate">
+        {value}
+      </span>
     </div>
   );
 }

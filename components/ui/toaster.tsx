@@ -83,7 +83,7 @@ export function Toaster() {
       <Toast.Provider swipeDirection="right" duration={5000}>
         <Toast.Viewport
           className={cn(
-            "fixed top-4 right-4 z-[9999] w-[360px] max-w-[calc(100vw-2rem)]",
+            "fixed top-4 right-4 z-9999 w-90 max-w-[calc(100vw-2rem)]",
             "flex flex-col gap-3 outline-none"
           )}
         />
@@ -95,7 +95,7 @@ export function Toaster() {
           return (
             <Toast.Root
               key={t.id}
-              open
+              duration={duration}
               onOpenChange={(open) => {
                 if (!open) dismiss(t.id);
               }}

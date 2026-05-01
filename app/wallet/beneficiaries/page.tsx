@@ -56,7 +56,7 @@ const avatarColors = [
   "from-indigo-500 to-cyan-500",
 ];
 
-const initialData: Beneficiary[] = [
+const INITIAL_BENEFICIARIES: Beneficiary[] = [
   {
     id: "1",
     name: "Amina Bello",
@@ -103,9 +103,122 @@ function validatePhone(phone: string) {
   return /^(070|080|081|090|091)\d{8}$/.test(phone);
 }
 
+const Card = ({ 
+  item, 
+  onEdit, 
+  onDelete, 
+  onToggleFavorite 
+}: { 
+  item: Beneficiary; 
+  onEdit: (item: Beneficiary) => void;
+  onDelete: (item: Beneficiary) => void;
+  onToggleFavorite: (id: string) => void;
+}) => {
+  const [menuOpen, setMenuOpen] = React.useState(false);
+
+  return (
+    <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl shadow-[0_10px_30px_rgba(124,58,237,0.14)]">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div
+            className={cn(
+              "flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br text-sm font-bold text-white shadow-lg",
+              item.avatarColor || avatarColors[0]
+            )}
+          >
+            {initials(item.name)}
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-white">{item.name}</h3>
+              {item.favorite && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-yellow-400/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-yellow-400">
+                  <Star className="h-3 w-3 fill-yellow-300" />
+                  Favorite
+                </span>
+              )}
+            </div>
+
+            <p className="text-sm text-white/70">{item.phone}</p>
+
+            <div className="mt-2 flex items-center gap-2">
+              <Badge variant="info" size="sm">
+                {item.network}
+              </Badge>
+              {item.nickname ? (
+                <span className="text-xs text-white/55">{item.nickname}</span>
+              ) : null}
+            </div>
+          </div>
+        </div>
+
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            className="rounded-xl p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
+          >
+            <MoreVertical className="h-5 w-5" />
+          </button>
+
+          {menuOpen && (
+            <div className="absolute right-0 z-20 mt-2 w-44 rounded-2xl border border-white/10 bg-[#161622] p-2 shadow-xl">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onEdit(item);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-white/85 hover:bg-white/10"
+              >
+                <Pencil className="h-4 w-4" />
+                Edit
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onDelete(item);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-white/85 hover:bg-white/10"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMenuOpen(false)}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-white/85 hover:bg-white/10"
+              >
+                <Send className="h-4 w-4" />
+                Send Money
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  onToggleFavorite(item.id);
+                }}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-white/85 hover:bg-white/10"
+              >
+                <Star className="h-4 w-4" />
+                {item.favorite ? "Remove Favorite" : "Set as Favorite"}
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function BeneficiariesPage() {
   const [beneficiaries, setBeneficiaries] =
-    React.useState<Beneficiary[]>(initialData);
+    React.useState<Beneficiary[]>(INITIAL_BENEFICIARIES);
   const [search, setSearch] = React.useState("");
 
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -143,7 +256,10 @@ export default function BeneficiariesPage() {
   }, [search, beneficiaries]);
 
   const favorites = filtered.filter((b) => b.favorite);
-  const others = filtered.filter((b) => !b.favorite);
+  const others = React.useMemo(() => 
+    filtered.filter((b) => !b.favorite)
+      .sort((a, b) => a.name.localeCompare(b.name)), 
+  [filtered]);
 
   const resetForm = () => {
     setForm({
@@ -250,112 +366,6 @@ export default function BeneficiariesPage() {
     );
   };
 
-  const Card = ({ item }: { item: Beneficiary }) => {
-    const [menuOpen, setMenuOpen] = React.useState(false);
-
-    return (
-      <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl shadow-[0_10px_30px_rgba(124,58,237,0.14)]">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div
-              className={cn(
-                "flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br text-sm font-bold text-white shadow-lg",
-                item.avatarColor
-              )}
-            >
-              {initials(item.name)}
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-white">{item.name}</h3>
-                {item.favorite && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-yellow-400/20 px-2 py-0.5 text-xs text-yellow-300">
-                    <Star className="h-3 w-3 fill-yellow-300" />
-                    Favorite
-                  </span>
-                )}
-              </div>
-
-              <p className="text-sm text-white/70">{item.phone}</p>
-
-              <div className="mt-2 flex items-center gap-2">
-                <Badge variant="info" size="sm">
-                  {item.network}
-                </Badge>
-                {item.nickname ? (
-                  <span className="text-xs text-white/55">{item.nickname}</span>
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setMenuOpen((v) => !v)}
-              className="rounded-xl p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
-            >
-              <MoreVertical className="h-5 w-5" />
-            </button>
-
-            {menuOpen && (
-              <div className="absolute right-0 z-20 mt-2 w-44 rounded-2xl border border-white/10 bg-[#161622] p-2 shadow-xl">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    openEdit(item);
-                  }}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-white/85 hover:bg-white/10"
-                >
-                  <Pencil className="h-4 w-4" />
-                  Edit
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setSelectedDelete(item);
-                    setDeleteOpen(true);
-                  }}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-white/85 hover:bg-white/10"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                  }}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-white/85 hover:bg-white/10"
-                >
-                  <Send className="h-4 w-4" />
-                  Send Money
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    toggleFavorite(item.id);
-                  }}
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-white/85 hover:bg-white/10"
-                >
-                  <Star className="h-4 w-4" />
-                  {item.favorite ? "Remove Favorite" : "Set as Favorite"}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <main className="min-h-screen bg-[#0f0f14] px-4 py-8 md:px-8 md:py-10">
       <div className="mx-auto max-w-6xl">
@@ -412,7 +422,16 @@ export default function BeneficiariesPage() {
 
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {favorites.map((item) => (
-                    <Card key={item.id} item={item} />
+                    <Card 
+                      key={item.id} 
+                      item={item} 
+                      onEdit={openEdit}
+                      onDelete={(item) => {
+                        setSelectedDelete(item);
+                        setDeleteOpen(true);
+                      }}
+                      onToggleFavorite={toggleFavorite}
+                    />
                   ))}
                 </div>
               </section>
@@ -425,7 +444,16 @@ export default function BeneficiariesPage() {
 
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {others.map((item) => (
-                  <Card key={item.id} item={item} />
+                  <Card 
+                    key={item.id} 
+                    item={item} 
+                    onEdit={openEdit}
+                    onDelete={(item) => {
+                      setSelectedDelete(item);
+                      setDeleteOpen(true);
+                    }}
+                    onToggleFavorite={toggleFavorite}
+                  />
                 ))}
               </div>
             </section>
@@ -458,7 +486,7 @@ export default function BeneficiariesPage() {
         <DialogBody>
           <div className="space-y-5">
             <Input
-              label="Full Name"
+              label="Beneficiary Name"
               placeholder="Enter beneficiary name"
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
@@ -480,7 +508,7 @@ export default function BeneficiariesPage() {
                   setErrors((prev) => ({ ...prev, phone: "" }));
                 }
               }}
-              state={errors.phone ? "error" : form.phone ? "success" : "default"}
+              state={errors.phone ? "error" : validatePhone(form.phone) ? "success" : "default"}
               errorMessage={errors.phone}
               helperText="Format: 08012345678"
             />
@@ -517,7 +545,7 @@ export default function BeneficiariesPage() {
                         setForm((prev) => ({ ...prev, avatarColor: color }))
                       }
                       className={cn(
-                        "h-10 w-10 rounded-full bg-gradient-to-br shadow-lg ring-2 transition",
+                        "h-10 w-10 rounded-full bg-linear-to-br shadow-lg ring-2 transition",
                         color,
                         active ? "ring-white" : "ring-transparent"
                       )}

@@ -5,10 +5,14 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Zap, CheckCircle2, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
+import { Card, CardContent } from "@/components/ui/card";
+import { toastSuccess } from "@/components/ui/toast";
+import DashboardLayout from "@/components/dashboard/layout";
 import {
   Dialog,
   DialogHeader,
@@ -20,27 +24,27 @@ import {
 import { cn } from "@/lib/utils";
 
 const providers = [
-  { id: "ikedc", label: "IKEDC" },
-  { id: "ekedc", label: "EKEDC" },
   { id: "aedc", label: "AEDC" },
+  { id: "ekedc", label: "EKEDC" },
+  { id: "ikedc", label: "IKEDC" },
   { id: "kedco", label: "KEDCO" },
   { id: "phed", label: "PHED" },
 ] as const;
 
 const schema = z.object({
-  provider: z.string().min(1, "Select an electricity provider"),
-  meterType: z.enum(["prepaid", "postpaid"], {
-    errorMap: () => ({ message: "Select meter type" }),
-  }),
-  meterNumber: z
-    .string()
-    .regex(/^\d{11}$/, "Meter number must be exactly 11 digits"),
   amount: z
     .number({ message: "Enter a valid amount" })
     .min(500, "Minimum amount is ₦500"),
+  meterNumber: z
+    .string()
+    .regex(/^\d{11}$/, "Meter number must be exactly 11 digits"),
+  meterType: z.enum(["postpaid", "prepaid"], {
+    required_error: "Select meter type",
+  }),
   phone: z
     .string()
     .regex(/^(070|080|081|090|091)\d{8}$/, "Enter a valid Nigerian number"),
+  provider: z.string().min(1, "Select an electricity provider"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -91,19 +95,19 @@ export default function ElectricityBillPage() {
     resolver: zodResolver(schema),
     mode: "onChange",
     defaultValues: {
-      provider: "",
-      meterType: "prepaid",
-      meterNumber: "",
       amount: 500,
+      meterNumber: "",
+      meterType: "prepaid",
       phone: "",
+      provider: "",
     },
   });
 
-  const selectedProvider = watch("provider");
-  const meterType = watch("meterType");
-  const meterNumber = watch("meterNumber");
   const amount = watch("amount");
+  const meterNumber = watch("meterNumber");
+  const meterType = watch("meterType");
   const phone = watch("phone");
+  const selectedProvider = watch("provider");
 
   const [verifying, setVerifying] = React.useState(false);
   const [meterVerified, setMeterVerified] = React.useState(false);
@@ -118,10 +122,10 @@ export default function ElectricityBillPage() {
   }, [meterNumber, selectedProvider, meterType]);
 
   const handleVerifyMeter = async () => {
-    const meterValid = await trigger("meterNumber");
     const providerValid = await trigger("provider");
+    const meterValid = await trigger("meterNumber");
 
-    if (!meterValid || !providerValid) return;
+    if (!providerValid || !meterValid) return;
 
     setVerifying(true);
     setVerifyError("");
@@ -144,36 +148,39 @@ export default function ElectricityBillPage() {
 
   const canProceed = isValid && meterVerified;
 
-  const onSubmit = () => {
+  const onSubmit = (data: FormValues) => {
     if (!meterVerified) return;
     setConfirmOpen(true);
   };
 
-  return (
-    <main className="relative min-h-screen overflow-hidden bg-[#000000] px-4 py-8 md:px-8 md:py-10">
-      <div className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-purple-500/30 blur-[140px]" />
+  const handleFinalConfirm = () => {
+    setConfirmOpen(false);
+    toastSuccess(`Payment of ₦${amount.toLocaleString()} for meter ${meterNumber} was successful!`);
+  };
 
-      <div className="relative mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_360px]">
+  return (
+    <DashboardLayout>
+      <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1fr_380px]">
         {/* Main Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <section className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl md:p-8">
+          <header className="mb-8">
             <div className="mb-2 flex items-center gap-3">
               <div className="rounded-2xl bg-white/10 p-3">
                 <Zap className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white md:text-4xl">
+                <h1 className="text-3xl font-black text-white md:text-4xl tracking-tight">
                   Pay Electricity Bill
                 </h1>
-                <p className="text-sm text-white/70">
+                <p className="text-sm font-medium text-white/70">
                   Verify your meter details and complete payment in one flow.
                 </p>
               </div>
             </div>
-          </section>
+          </header>
 
           {/* Step 1 */}
-          <section className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl md:p-8">
+          <Card accent variant="elevated">
             <h2 className="mb-4 text-xl font-semibold text-white">
               1. Select provider
             </h2>
@@ -183,9 +190,11 @@ export default function ElectricityBillPage() {
                 const active = selectedProvider === provider.id;
 
                 return (
-                  <button
+                  <motion.button
                     key={provider.id}
                     type="button"
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() =>
                       setValue("provider", provider.id, {
                         shouldValidate: true,
@@ -194,9 +203,9 @@ export default function ElectricityBillPage() {
                     }
                     className={cn(
                       "rounded-2xl border px-4 py-4 text-left transition-all duration-200",
-                      "focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50",
+                      "focus:outline-none focus:ring-2 focus:ring-accent/50",
                       active
-                        ? "border-transparent bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))] text-white shadow-[0_12px_24px_rgba(236,72,153,0.18)]"
+                        ? "border-transparent bg-linear-to-br from-primary to-secondary text-white shadow-lg"
                         : "border-white/15 bg-white/5 text-white/85 hover:bg-white/10"
                     )}
                   >
@@ -206,20 +215,20 @@ export default function ElectricityBillPage() {
                         <CheckCircle2 className="h-4 w-4 text-white" />
                       )}
                     </div>
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
 
             {errors.provider && (
-              <p className="mt-3 text-sm text-[var(--color-danger)]">
+              <p className="mt-3 text-sm font-semibold text-danger">
                 {errors.provider.message}
               </p>
             )}
-          </section>
+          </Card>
 
           {/* Step 2 */}
-          <section className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl md:p-8">
+          <Card accent variant="elevated">
             <h2 className="mb-4 text-xl font-semibold text-white">
               2. Meter type
             </h2>
@@ -228,36 +237,37 @@ export default function ElectricityBillPage() {
               name="meterType"
               control={control}
               render={({ field }) => (
-                <div className="flex flex-col gap-3 md:flex-row">
+                <div className="grid grid-cols-2 gap-3 max-w-sm">
                   {[
-                    { value: "prepaid", label: "Prepaid" },
                     { value: "postpaid", label: "Postpaid" },
+                    { value: "prepaid", label: "Prepaid" },
                   ].map((option) => {
                     const active = field.value === option.value;
 
                     return (
-                      <button
+                      <motion.button
                         key={option.value}
                         type="button"
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => field.onChange(option.value)}
                         className={cn(
                           "rounded-2xl border px-5 py-4 text-left transition-all duration-200",
                           active
-                            ? "border-transparent bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))] text-white shadow-[0_12px_24px_rgba(124,58,237,0.22)]"
+                            ? "border-transparent bg-linear-to-br from-primary to-secondary text-white shadow-lg"
                             : "border-white/15 bg-white/5 text-white/85 hover:bg-white/10"
                         )}
                       >
-                        <span className="font-medium">{option.label}</span>
-                      </button>
+                        <span className="font-bold">{option.label}</span>
+                      </motion.button>
                     );
                   })}
                 </div>
               )}
             />
-          </section>
+          </Card>
 
           {/* Step 3 */}
-          <section className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl md:p-8">
+          <Card accent variant="elevated">
             <h2 className="mb-4 text-xl font-semibold text-white">
               3. Meter number
             </h2>
@@ -294,40 +304,34 @@ export default function ElectricityBillPage() {
                 type="button"
                 onClick={handleVerifyMeter}
                 disabled={verifying}
-                className="md:min-w-[180px]"
+                className="md:min-w-45 h-11 rounded-xl"
+                leftIcon={verifying ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               >
-                {verifying ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Verifying...
-                  </>
-                ) : (
-                  "Verify Meter"
-                )}
+                {verifying ? "Verifying..." : "Verify Meter"}
               </Button>
             </div>
 
             {verifyError && (
-              <p className="mt-3 text-sm text-[var(--color-danger)]">
+              <p className="mt-3 text-sm font-semibold text-danger">
                 {verifyError}
               </p>
             )}
 
             {meterVerified && meterInfo && (
-              <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className="text-sm text-white/60">Customer name</p>
-                <p className="text-lg font-semibold text-white">
+              <div className="mt-5 rounded-2xl border border-white/10 bg-black/40 p-5 animate-in fade-in slide-in-from-top-2">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Customer name</p>
+                <p className="text-xl font-black text-white tracking-tight">
                   {meterInfo.customerName}
                 </p>
 
-                <p className="mt-3 text-sm text-white/60">Address</p>
-                <p className="text-white">{meterInfo.address}</p>
+                <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Address</p>
+                <p className="text-sm font-medium text-white/80 leading-relaxed">{meterInfo.address}</p>
               </div>
             )}
-          </section>
+          </Card>
 
           {/* Step 4 */}
-          <section className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl md:p-8">
+          <Card accent variant="elevated">
             <h2 className="mb-4 text-xl font-semibold text-white">
               4. Amount
             </h2>
@@ -360,10 +364,10 @@ export default function ElectricityBillPage() {
                 />
               )}
             />
-          </section>
+          </Card>
 
           {/* Step 5 */}
-          <section className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl md:p-8">
+          <Card accent variant="elevated">
             <h2 className="mb-4 text-xl font-semibold text-white">
               5. Notification number
             </h2>
@@ -389,134 +393,138 @@ export default function ElectricityBillPage() {
                 />
               )}
             />
-          </section>
+          </Card>
 
           <div className="lg:hidden">
-            <Button type="submit" fullWidth disabled={!canProceed}>
+            <Button type="submit" fullWidth disabled={!canProceed} size="xl">
               Proceed to Payment
             </Button>
           </div>
         </form>
 
         {/* Sticky Summary */}
-        <aside className="h-fit lg:sticky lg:top-8">
-          <div className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl">
-            <h2 className="text-2xl font-semibold text-white">Summary</h2>
-            <p className="mt-1 text-sm text-white/60">
+        <aside className="h-fit lg:sticky lg:top-24">
+          <Card variant="elevated" className="border-primary/20 bg-primary/5">
+            <h2 className="text-2xl font-black text-white tracking-tight">Summary</h2>
+            <p className="mt-1 text-sm font-medium text-white/60">
               Updates in real time as you fill the form.
             </p>
 
             <div className="mt-6 space-y-4">
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className="text-sm text-white/60">Provider</p>
-                <p className="mt-1 text-white font-medium">
+              <div className="rounded-2xl border border-white/5 bg-black/20 p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Provider</p>
+                <p className="mt-1 text-lg font-bold text-white">
                   {selectedProvider
                     ? providers.find((p) => p.id === selectedProvider)?.label
                     : "Not selected"}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className="text-sm text-white/60">Meter type</p>
-                <p className="mt-1 capitalize text-white font-medium">
+              <div className="rounded-2xl border border-white/5 bg-black/20 p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Meter type</p>
+                <p className="mt-1 text-lg font-bold capitalize text-white">
                   {meterType || "Not selected"}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className="text-sm text-white/60">Meter number</p>
-                <p className="mt-1 text-white font-medium">
+              <div className="rounded-2xl border border-white/5 bg-black/20 p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Meter number</p>
+                <p className="mt-1 text-lg font-bold text-white">
                   {meterNumber || "Not entered"}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className="text-sm text-white/60">Meter info</p>
+              <div className="rounded-2xl border border-white/5 bg-black/20 p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Meter info</p>
                 {meterVerified && meterInfo ? (
                   <>
-                    <p className="mt-1 text-white font-medium">
+                    <p className="mt-1 text-base font-bold text-white">
                       {meterInfo.customerName}
                     </p>
-                    <p className="text-sm text-white/70">
+                    <p className="text-xs text-white/50 truncate">
                       {meterInfo.address}
                     </p>
                   </>
                 ) : (
-                  <p className="mt-1 text-white/70">Not verified yet</p>
+                  <p className="mt-1 text-base font-bold text-white/20">Not verified yet</p>
                 )}
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className="text-sm text-white/60">Amount</p>
-                <p className="mt-1 text-white font-medium">
+              <div className="rounded-2xl border border-white/5 bg-black/20 p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Amount</p>
+                <p className="mt-1 text-2xl font-black text-white">
                   ₦{Number.isFinite(amount) ? amount.toLocaleString() : "0"}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                <p className="text-sm text-white/60">Notification number</p>
-                <p className="mt-1 text-white font-medium">
+              <div className="rounded-2xl border border-white/5 bg-black/20 p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Notification number</p>
+                <p className="mt-1 text-lg font-bold text-white">
                   {phone || "Not entered"}
                 </p>
               </div>
             </div>
 
             <div className="mt-6 hidden lg:block">
-              <Button type="button" fullWidth disabled={!canProceed} onClick={handleSubmit(onSubmit)}>
+              <Button type="button" fullWidth disabled={!canProceed} size="xl" onClick={handleSubmit(onSubmit)}>
                 Proceed to Payment
               </Button>
             </div>
-          </div>
+          </Card>
         </aside>
       </div>
 
       {/* Confirmation Modal */}
-      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen} size="md">
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen} size="sm">
         <DialogHeader>
-          <DialogTitle>Confirm Electricity Payment</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl font-black tracking-tight">Confirm Electricity Payment</DialogTitle>
+          <DialogDescription className="font-medium">
             Please review the details before proceeding.
           </DialogDescription>
         </DialogHeader>
 
         <DialogBody>
-          <div className="space-y-3 text-white/85">
-            <p>
+          <div className="space-y-3 text-white/85 font-medium">
+            <p className="flex justify-between">
               <span className="text-white/60">Provider:</span>{" "}
-              {providers.find((p) => p.id === selectedProvider)?.label}
+              <span className="font-bold">{providers.find((p) => p.id === selectedProvider)?.label}</span>
             </p>
-            <p>
-              <span className="text-white/60">Meter Type:</span> {meterType}
+            <p className="flex justify-between">
+              <span className="text-white/60">Meter Type:</span> 
+              <span className="font-bold capitalize">{meterType}</span>
             </p>
-            <p>
-              <span className="text-white/60">Meter Number:</span> {meterNumber}
+            <p className="flex justify-between">
+              <span className="text-white/60">Meter Number:</span> 
+              <span className="font-bold">{meterNumber}</span>
             </p>
-            <p>
+            <p className="flex justify-between">
               <span className="text-white/60">Customer:</span>{" "}
-              {meterInfo?.customerName}
+              <span className="font-bold">{meterInfo?.customerName}</span>
             </p>
             <p>
-              <span className="text-white/60">Address:</span> {meterInfo?.address}
+              <span className="text-white/60 block mb-1">Address:</span> 
+              <span className="font-bold text-sm block leading-relaxed">{meterInfo?.address}</span>
             </p>
-            <p>
-              <span className="text-white/60">Amount:</span> ₦
-              {Number.isFinite(amount) ? amount.toLocaleString() : "0"}
+            <p className="flex justify-between">
+              <span className="text-white/60">Amount:</span> 
+              <span className="font-black text-lg text-primary">₦{Number.isFinite(amount) ? amount.toLocaleString() : "0"}</span>
             </p>
-            <p>
-              <span className="text-white/60">Notification Number:</span> {phone}
+            <p className="flex justify-between">
+              <span className="text-white/60">Phone:</span> 
+              <span className="font-bold">{phone}</span>
             </p>
           </div>
         </DialogBody>
 
         <DialogFooter>
-          <Button variant="secondary" onClick={() => setConfirmOpen(false)}>
+          <Button variant="ghost" className="text-white/40" onClick={() => setConfirmOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={() => setConfirmOpen(false)}>
+          <Button onClick={handleFinalConfirm}>
             Confirm Payment
           </Button>
         </DialogFooter>
       </Dialog>
-    </main>
+    </DashboardLayout>
   );
 }

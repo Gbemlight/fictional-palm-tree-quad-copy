@@ -2,16 +2,21 @@
 
 import * as React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  Wallet,
+  CheckCircle2,
+  Copy,
   CreditCard,
   Landmark,
   Smartphone,
+  Wallet,
   X,
-  CheckCircle2,
-  Copy,
 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toastInfo, toastSuccess } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
 
 function useClipboard(text: string, options?: { successDuration?: number }) {
   const [copied, setCopied] = React.useState(false);
@@ -26,48 +31,43 @@ function useClipboard(text: string, options?: { successDuration?: number }) {
   return [copied, copy] as const;
 }
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toastSuccess, toastInfo } from "@/components/ui/toast";
-import { cn } from "@/lib/utils";
-
-type PaymentMethod = "card" | "bank" | "ussd";
+type PaymentMethod = "bank" | "card" | "ussd";
 
 interface AddMoneyModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   currentBalance?: number;
+  onOpenChange: (open: boolean) => void;
   onSuccess?: (amount: number) => void;
+  open: boolean;
 }
 
-const QUICK_AMOUNTS = [1000, 5000, 10000, 20000];
-const MIN_AMOUNT = 100;
 const MAX_AMOUNT = 500000;
+const MIN_AMOUNT = 100;
+const QUICK_AMOUNTS = [1000, 5000, 10000, 20000];
 
 const bankDetails = {
-  bankName: "Wema Bank",
-  accountNumber: "1234567890",
   accountName: "QuickPay Technologies Ltd",
+  accountNumber: "1234567890",
+  bankName: "Wema Bank",
 };
 
 const methods = [
   {
-    id: "card" as PaymentMethod,
-    name: "Debit Card",
-    description: "Fund instantly using your bank card",
-    icon: <CreditCard className="h-5 w-5" />,
-  },
-  {
-    id: "bank" as PaymentMethod,
-    name: "Bank Transfer",
     description: "Transfer to a dedicated account number",
     icon: <Landmark className="h-5 w-5" />,
+    id: "bank" as PaymentMethod,
+    name: "Bank Transfer",
   },
   {
-    id: "ussd" as PaymentMethod,
-    name: "USSD",
+    description: "Secure payment via Paystack",
+    icon: <CreditCard className="h-5 w-5" />,
+    id: "card" as PaymentMethod,
+    name: "Debit Card",
+  },
+  {
     description: "Fund with your bank's USSD code",
     icon: <Smartphone className="h-5 w-5" />,
+    id: "ussd" as PaymentMethod,
+    name: "USSD",
   },
 ];
 
@@ -92,10 +92,10 @@ function ConfettiBurst() {
           }}
           initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
           animate={{
-            x: (Math.random() - 0.5) * 260,
-            y: (Math.random() - 0.5) * 220,
             opacity: 0,
             scale: 0.2,
+            x: (Math.random() - 0.5) * 260,
+            y: (Math.random() - 0.5) * 220,
           }}
           transition={{ duration: 0.9, ease: "easeOut" }}
         />
@@ -105,16 +105,16 @@ function ConfettiBurst() {
 }
 
 export function AddMoneyModal({
-  open,
-  onOpenChange,
   currentBalance = 125000,
+  onOpenChange,
   onSuccess,
+  open,
 }: AddMoneyModalProps) {
   const [amount, setAmount] = React.useState<number | "">("");
-  const [method, setMethod] = React.useState<PaymentMethod | "">("");
-  const [loading, setLoading] = React.useState(false);
-  const [success, setSuccess] = React.useState(false);
   const [balance, setBalance] = React.useState(currentBalance);
+  const [loading, setLoading] = React.useState(false);
+  const [method, setMethod] = React.useState<PaymentMethod | "">("");
+  const [success, setSuccess] = React.useState(false);
 
   const [copiedAccount, copyAccount] = useClipboard(bankDetails.accountNumber, {
     successDuration: 1500,
@@ -139,10 +139,10 @@ export function AddMoneyModal({
 
   React.useEffect(() => {
     if (!open) {
-      setLoading(false);
-      setSuccess(false);
-      setMethod("");
       setAmount("");
+      setLoading(false);
+      setMethod("");
+      setSuccess(false);
     }
   }, [open]);
 
@@ -244,21 +244,6 @@ export function AddMoneyModal({
             </div>
 
             <Input
-              label="Amount"
-              type="number"
-              placeholder="Enter amount"
-              value={amount}
-              onChange={(e) =>
-                setAmount(e.target.value === "" ? "" : Number(e.target.value))
-              }
-              helperText={`Minimum ₦${MIN_AMOUNT.toLocaleString()} • Maximum ₦${MAX_AMOUNT.toLocaleString()}`}
-              state={
-                amount === ""
-                  ? "default"
-                  : amountValid
-                  ? "success"
-                  : "error"
-              }
               errorMessage={
                 amount === ""
                   ? undefined
@@ -266,6 +251,21 @@ export function AddMoneyModal({
                   ? `Enter an amount between ₦${MIN_AMOUNT.toLocaleString()} and ₦${MAX_AMOUNT.toLocaleString()}`
                   : undefined
               }
+              helperText={`Minimum ₦${MIN_AMOUNT.toLocaleString()} • Maximum ₦${MAX_AMOUNT.toLocaleString()}`}
+              label="Amount"
+              onChange={(e) =>
+                setAmount(e.target.value === "" ? "" : Number(e.target.value))
+              }
+              placeholder="Enter amount"
+              state={
+                amount === ""
+                  ? "default"
+                  : amountValid
+                  ? "success"
+                  : "error"
+              }
+              type="number"
+              value={amount}
             />
           </section>
 
@@ -280,15 +280,15 @@ export function AddMoneyModal({
 
                   return (
                     <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setMethod(item.id)}
                       className={cn(
                         "flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-all",
                         active
                           ? "border-transparent bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))] shadow-[0_12px_24px_rgba(236,72,153,0.22)]"
                           : "border-white/10 bg-black/20 hover:bg-white/10"
                       )}
+                      key={item.id}
+                      onClick={() => setMethod(item.id)}
+                      type="button"
                     >
                       <div className="rounded-xl bg-white/10 p-3">
                         {item.icon}
@@ -319,8 +319,20 @@ export function AddMoneyModal({
 
               <div className="space-y-4">
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-sm text-white/60">Bank Name</p>
-                  <p className="mt-1 font-semibold">{bankDetails.bankName}</p>
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-white/60">Account Name</p>
+                      <p className="mt-1 font-semibold">{bankDetails.accountName}</p>
+                    </div>
+                    <Button
+                      leftIcon={<Copy className="h-4 w-4" />}
+                      onClick={copyName}
+                      type="button"
+                      variant="secondary"
+                    >
+                      Copy
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -330,10 +342,10 @@ export function AddMoneyModal({
                       <p className="mt-1 font-semibold">{bankDetails.accountNumber}</p>
                     </div>
                     <Button
-                      type="button"
-                      variant="secondary"
                       leftIcon={<Copy className="h-4 w-4" />}
                       onClick={copyAccount}
+                      type="button"
+                      variant="secondary"
                     >
                       Copy
                     </Button>
@@ -341,20 +353,8 @@ export function AddMoneyModal({
                 </div>
 
                 <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm text-white/60">Account Name</p>
-                      <p className="mt-1 font-semibold">{bankDetails.accountName}</p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      leftIcon={<Copy className="h-4 w-4" />}
-                      onClick={copyName}
-                    >
-                      Copy
-                    </Button>
-                  </div>
+                  <p className="text-sm text-white/60">Bank Name</p>
+                  <p className="mt-1 font-semibold">{bankDetails.bankName}</p>
                 </div>
               </div>
             </section>

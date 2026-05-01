@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 type SkeletonVariant = "rectangle" | "text" | "avatar" | "card";
 
-export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface SkeletonProps extends HTMLMotionProps<"div"> { // Extend HTMLMotionProps directly
   variant?: SkeletonVariant;
   width?: string | number;
   height?: string | number;
@@ -32,13 +33,14 @@ export function Skeleton({
   ...props
 }: SkeletonProps) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0.5 }}
+      animate={{ opacity: [0.5, 0.8, 0.5] }}
+      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
       className={cn(
         "relative overflow-hidden",
-        "bg-[linear-gradient(90deg,rgba(229,231,235,0.55),rgba(243,244,246,0.85),rgba(229,231,235,0.55))]",
-        "dark:bg-[linear-gradient(90deg,rgba(55,65,81,0.55),rgba(75,85,99,0.8),rgba(55,65,81,0.55))]",
+        "bg-neutral-200 dark:bg-neutral-800",
         variantBase[variant],
-        "skeleton-shimmer",
         className
       )}
       style={{
@@ -47,7 +49,13 @@ export function Skeleton({
         ...style,
       }}
       {...props}
-    />
+    >
+      <motion.div
+        className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 dark:via-white/5 to-transparent"
+        animate={{ x: ["-100%", "100%"] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+      />
+    </motion.div>
   );
 }
 
@@ -72,6 +80,52 @@ export function SkeletonText({
           )}
         />
       ))}
+    </div>
+  );
+}
+
+/** Transaction list skeleton */
+export function SkeletonTransactionList() {
+  return (
+    <div className="space-y-4">
+      <Skeleton variant="text" width={120} height={24} className="mb-6" />
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 p-4 bg-white/5 rounded-3xl border border-white/5">
+          <Skeleton variant="rectangle" width={48} height={48} className="rounded-2xl" />
+          <div className="flex-1 space-y-2">
+            <Skeleton variant="text" width="60%" height={16} />
+            <Skeleton variant="text" width="40%" height={12} />
+          </div>
+          <div className="text-right space-y-2">
+            <Skeleton variant="text" width={60} height={16} className="ml-auto" />
+            <Skeleton variant="text" width={40} height={12} className="ml-auto" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Profile page skeleton */
+export function SkeletonProfile() {
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col items-center gap-4">
+        <Skeleton variant="avatar" width={96} height={96} />
+        <Skeleton variant="text" width={150} height={12} />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton variant="text" width={80} height={10} />
+            <Skeleton variant="rectangle" height={48} className="rounded-xl" />
+          </div>
+        ))}
+      </div>
+      <div className="space-y-2">
+        <Skeleton variant="text" width={80} height={10} />
+        <Skeleton variant="rectangle" height={100} className="rounded-xl" />
+      </div>
     </div>
   );
 }

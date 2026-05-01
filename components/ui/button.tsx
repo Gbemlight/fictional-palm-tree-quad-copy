@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export type ButtonVariant =
@@ -10,12 +9,12 @@ export type ButtonVariant =
   | "secondary"
   | "ghost"
   | "danger"
-  | "success";
+  | "success"
+  | "outline"; // Add outline variant
 
 export type ButtonSize = "sm" | "md" | "lg" | "xl";
 
-interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends HTMLMotionProps<"button"> { // Extend HTMLMotionProps directly
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
@@ -28,13 +27,15 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary:
     "bg-gradient-to-r from-purple-600 to-pink-500 text-white shadow-md hover:shadow-pink-500/40",
   secondary:
-    "border border-gray-300 text-gray-800 bg-white hover:bg-gray-50",
+    "border border-neutral-200 text-neutral-800 bg-white hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800", // Adjusted for dark mode
   ghost:
-    "bg-transparent text-gray-700 hover:bg-gray-100",
+    "bg-transparent text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800", // Adjusted for dark mode
   danger:
     "bg-red-600 text-white hover:bg-red-700",
   success:
     "bg-green-600 text-white hover:bg-green-700",
+  outline:
+    "bg-transparent border border-neutral-300 text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800", // Generic outline styles
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -82,7 +83,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {loading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <motion.div 
+            className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white" 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+          />
         ) : (
           <>
             {leftIcon && <span className="flex items-center">{leftIcon}</span>}

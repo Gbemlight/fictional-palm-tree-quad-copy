@@ -13,6 +13,7 @@ import {
   ArrowLeftRight,
   Wallet,
   Settings,
+  HelpCircle,
   Menu,
   ChevronLeft,
   ChevronRight,
@@ -34,6 +35,7 @@ const NAV: NavItem[] = [
   { label: "Transactions", href: "/transactions", icon: <ArrowLeftRight className="h-5 w-5" /> },
   { label: "Wallet", href: "/wallet", icon: <Wallet className="h-5 w-5" /> },
   { label: "Settings", href: "/settings", icon: <Settings className="h-5 w-5" /> },
+  { label: "Help Center", href: "/help", icon: <HelpCircle className="h-5 w-5" /> },
 ];
 
 const STORAGE_KEY = "quickpay_sidebar_collapsed";
@@ -59,41 +61,47 @@ export function Sidebar({
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === "1") setCollapsed(true);
-    } catch {}
+    } catch (e) {
+      console.warn("Failed to load sidebar state", e);
+    }
   }, []);
 
   React.useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
-    } catch {}
+    } catch (e) {
+      console.warn("Failed to save sidebar state", e);
+    }
   }, [collapsed]);
 
+  // Sidebar Inner Content - Shared between Mobile and Desktop
   const SidebarInner = ({ onNavigate }: { onNavigate?: () => void }) => (
     <aside
       className={cn(
-        "relative h-full bg-white/10 backdrop-blur-xl border border-white/15 text-white",
-        "shadow-xl overflow-hidden",
-        collapsed ? "w-[88px]" : "w-[280px]"
+        "relative h-full transition-all duration-300",
+        "bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl border-r border-neutral-200 dark:border-white/10",
+        "text-neutral-900 dark:text-white shadow-xl overflow-hidden",
+        collapsed ? "w-20" : "w-64"
       )}
       aria-label="Sidebar"
     >
       {/* Gradient border on right edge */}
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-0 h-full w-[2px] bg-[linear-gradient(180deg,var(--color-primary),var(--color-secondary),var(--color-accent))] opacity-80"
+        className="pointer-events-none absolute right-0 top-0 h-full w-0.5 bg-linear-to-b from-primary via-secondary to-accent opacity-50 dark:opacity-80"
       />
 
       <div className="flex h-full flex-col">
         {/* Top branding */}
         <div className={cn("flex items-center justify-between px-4 py-4", collapsed && "px-3")}>
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))] shadow-md" />
+            <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-primary to-secondary shadow-lg shadow-primary/20" />
             {!collapsed && (
               <div className="leading-tight">
-                <div className="text-lg font-extrabold bg-[linear-gradient(90deg,var(--color-primary),var(--color-secondary),var(--color-accent))] bg-clip-text text-transparent">
+                <div className="text-lg font-black tracking-tighter bg-linear-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
                   QuickPay
                 </div>
-                <div className="text-xs text-white/60">Dashboard</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-white/40">Hub</div>
               </div>
             )}
           </div>
@@ -103,7 +111,7 @@ export function Sidebar({
             type="button"
             className={cn(
               "hidden md:inline-flex items-center justify-center rounded-xl p-2",
-              "hover:bg-white/10 transition"
+              "hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors"
             )}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             onClick={() => setCollapsed((v) => !v)}
@@ -120,17 +128,17 @@ export function Sidebar({
 
               return (
                 <li key={item.href}>
-                  <motion.div whileHover={{ scale: 1.02 }} transition={{ duration: 0.2 }}>
+                  <motion.div whileHover={{ scale: 1.02, filter: "drop-shadow(0 0 8px rgba(124, 58, 237, 0.4))" }} transition={{ duration: 0.2 }}>
                     <Link
                       href={item.href}
                       onClick={onNavigate}
                       className={cn(
-                        "group flex items-center gap-3 rounded-xl px-3 py-2.5 outline-none",
-                        "transition-all duration-200",
-                        "focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]/60 focus-visible:ring-offset-0",
+                        "group flex items-center gap-3 rounded-xl px-3 py-3 outline-none",
+                        "transition-all duration-300",
+                        "focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-0",
                         active
-                          ? "bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))] text-white shadow-[0_12px_24px_rgba(236,72,153,0.18)]"
-                          : "text-white/80 hover:bg-white/10"
+                          ? "bg-linear-to-br from-primary to-secondary text-white shadow-lg shadow-primary/30"
+                          : "text-neutral-500 dark:text-white/60 hover:bg-neutral-100 dark:hover:bg-white/10 hover:text-neutral-900 dark:hover:text-white"
                       )}
                       aria-current={active ? "page" : undefined}
                     >
@@ -158,14 +166,14 @@ export function Sidebar({
 
         {/* User section */}
         <div className={cn("mt-auto px-4 py-4", collapsed && "px-3")}>
-          <div className={cn("flex items-center gap-3 rounded-2xl bg-white/5 border border-white/10 p-3")}>
-            <div className="h-10 w-10 overflow-hidden rounded-full bg-white/10 flex items-center justify-center">
+          <div className={cn("flex items-center gap-3 rounded-2xl bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 p-3 shadow-sm")}>
+            <div className="h-10 w-10 overflow-hidden rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20">
               {/* simple avatar */}
               {user.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover" />
               ) : (
-                <span className="text-sm font-bold text-white/80">
+                <span className="text-sm font-bold text-primary dark:text-white/80">
                   {user.name.split(" ").map((s) => s[0]).slice(0, 2).join("")}
                 </span>
               )}
@@ -173,8 +181,8 @@ export function Sidebar({
 
             {!collapsed && (
               <div className="min-w-0">
-                <div className="truncate text-sm font-semibold">{user.name}</div>
-                <div className="truncate text-xs text-white/60">{user.email}</div>
+                <div className="truncate text-sm font-bold text-neutral-900 dark:text-white">{user.name}</div>
+                <div className="truncate text-[10px] font-medium text-neutral-500 dark:text-white/50">{user.email}</div>
               </div>
             )}
           </div>
@@ -190,7 +198,7 @@ export function Sidebar({
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="inline-flex items-center justify-center rounded-xl bg-white/10 backdrop-blur border border-white/15 p-3 text-white shadow-lg"
+          className="inline-flex items-center justify-center rounded-xl bg-white/90 dark:bg-neutral-900/90 backdrop-blur border border-neutral-200 dark:border-white/15 p-3 text-neutral-900 dark:text-white shadow-xl"
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
@@ -206,7 +214,10 @@ export function Sidebar({
       <Dialog.Root open={mobileOpen} onOpenChange={setMobileOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
-          <Dialog.Content className="fixed inset-0 z-50 outline-none">
+          <Dialog.Content className="fixed inset-y-0 left-0 z-50 outline-none">
+            <Dialog.Title className="sr-only">Navigation Menu</Dialog.Title>
+            <Dialog.Description className="sr-only">QuickPay Hub navigation links for mobile devices.</Dialog.Description>
+            
             <motion.div
               initial={{ x: -40, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
@@ -218,7 +229,7 @@ export function Sidebar({
                 <div className="absolute top-4 right-4 z-50">
                   <Dialog.Close asChild>
                     <button
-                      className="rounded-xl bg-white/10 backdrop-blur border border-white/15 p-3 text-white"
+                      className="rounded-xl bg-neutral-100 dark:bg-white/10 backdrop-blur border border-neutral-200 dark:border-white/15 p-3 text-neutral-900 dark:text-white"
                       aria-label="Close menu"
                     >
                       <X className="h-5 w-5" />

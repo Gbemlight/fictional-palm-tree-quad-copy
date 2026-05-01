@@ -1,20 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import React from "react";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ChevronLeft, ArrowRight, UserPlus, Clock, Users, CheckCircle2 } from "lucide-react";
 import { savedBeneficiaries } from "../../../lib/dummy-data";
-
-const phoneSchema = z.string()
-  .regex(/^0(70|80|81|90|91)\d{8}$/, "Enter a valid Nigerian phone number (e.g. 08012345678)");
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 const formSchema = z.object({
-  phone: phoneSchema,
-  save: z.boolean().optional(),
-  name: z.string().optional(),
+  phone: z.string().regex(/^(070|080|081|090|091)\d{8}$/, "Enter a valid Nigerian phone number"),
+  saveBeneficiary: z.boolean(),
+  beneficiaryName: z.string().optional(),
+}).refine((data) => !data.saveBeneficiary || (data.saveBeneficiary && data.beneficiaryName && data.beneficiaryName.length >= 2), {
+  message: "Enter a name to save this beneficiary",
+  path: ["beneficiaryName"],
 });
+
+type FormValues = z.infer<typeof formSchema>;
 
 const recentRecipients = [
   "08012345678",
@@ -22,130 +31,196 @@ const recentRecipients = [
   "09087654321",
 ];
 
+function autoFormatPhone(val: string) {
+  if (!val) return "";
+  const digits = val.replace(/\D/g, "");
+  let formatted = digits;
+  if (digits.length > 3) formatted = digits.slice(0, 3) + " " + digits.slice(3);
+  if (digits.length > 7) formatted = formatted.slice(0, 8) + " " + formatted.slice(8);
+  return formatted;
+}
+
 export default function BuyDataRecipientPage() {
-  const [formatPhone, setFormatPhone] = useState("");
-  const { register, handleSubmit, setValue, watch, formState: { errors, touchedFields } } = useForm({
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const planId = searchParams.get("plan");
+
+  const { control, handleSubmit, setValue, watch, formState: { errors, isValid } } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { phone: "", save: false, name: "" },
+    defaultValues: { phone: "", saveBeneficiary: false, beneficiaryName: "" },
     mode: "onChange"
   });
 
-  const saveChecked = watch("save");
-
-  function autoFormatPhone(val: string) {
-    if (!val) return "";
-    // Format as 080 1234 5678
-    const digits = val.replace(/\D/g, "");
-    let formatted = digits;
-    if (digits.length > 3) formatted = digits.slice(0, 3) + " " + digits.slice(3);
-    if (digits.length > 7) formatted = formatted.slice(0, 8) + " " + formatted.slice(8);
-    return formatted;
-  }
-
-  // Keep formatPhone in sync with form value
+  const saveChecked = watch("saveBeneficiary");
   const phoneValue = watch("phone");
-  React.useEffect(() => {
-    setFormatPhone(autoFormatPhone(phoneValue));
-  }, [phoneValue]);
 
-  function onPhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const val = e.target.value.replace(/\D/g, "");
-    setValue("phone", val, { shouldValidate: true, shouldTouch: true });
-  }
-
-  function onBeneficiarySelect(ben: { phone: string; name?: string }) {
-    const clean = ben.phone.replace(/\D/g, "");
-    setValue("phone", clean, { shouldValidate: true, shouldTouch: true });
-  }
-
-  function onRecentSelect(num: string) {
-    setValue("phone", num, { shouldValidate: true, shouldTouch: true });
-  }
-
-  function onSubmit(data: { phone: string; save?: boolean; name?: string }) {
-    window.location.assign(`/buy-data/payment?phone=${data.phone}${data.save && data.name ? `&name=${data.name}` : ""}`);
+  function onSubmit(data: FormValues) {
+    const params = new URLSearchParams({
+      plan: planId || "",
+      phone: data.phone,
+      ...(data.saveBeneficiary && { name: data.beneficiaryName || "" })
+    });
+    router.push(`/buy-data/payment?${params.toString()}`);
   }
 
   return (
-    <div className="min-h-screen bg-[#18181b] text-white p-6 pb-24">
-      <Link href="/buy-data/plans" className="mb-6 inline-block text-sm text-white/70 hover:text-white transition">&larr; Back to Plans</Link>
-      <div className="mb-6 flex gap-4">
-        <button className="px-4 py-2 rounded-full bg-indigo-500 text-white font-semibold">Recipient</button>
-      </div>
-      <h1 className="text-2xl font-bold mb-2">Enter Recipient Number</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div>
-          <label className="block mb-2 font-semibold">Phone Number</label>
-          <input
-            type="text"
-            inputMode="numeric"
-            maxLength={14}
-            className={`w-full rounded-lg p-3 bg-[#23232a] text-white text-lg border ${errors.phone ? "border-red-500" : "border-white/10"}`}
-            value={formatPhone}
-            onChange={onPhoneChange}
-            onBlur={e => setValue("phone", e.target.value.replace(/\D/g, ""))}
-            placeholder="080 1234 5678"
-            autoComplete="off"
-          />
-          {errors.phone && touchedFields.phone && (
-            <div className="mt-2 text-red-500 text-sm">{errors.phone.message}</div>
-          )}
-        </div>
-        <div className="flex items-center gap-2 mt-2">
-          <input type="checkbox" id="save" {...register("save")} className="accent-indigo-500 w-4 h-4" />
-          <label htmlFor="save" className="text-sm">Save this number as beneficiary</label>
-        </div>
-        {saveChecked && (
-          <div>
-            <label className="block mb-2 text-sm">Beneficiary Name</label>
-            <input
-              type="text"
-              {...register("name")}
-              className="w-full rounded-lg p-3 bg-[#23232a] text-white text-lg border border-white/10"
-              placeholder="Enter name (e.g. Dad, Work)"
-              autoComplete="off"
-            />
-          </div>
-        )}
-        <button
-          className="w-full max-w-xs mx-auto block rounded-xl py-3 font-semibold text-lg transition bg-indigo-500 hover:bg-indigo-600 text-white"
-          type="submit"
+    <main className="min-h-screen bg-neutral-50 dark:bg-neutral-950 p-6 md:p-12 lg:p-16">
+      <div className="max-w-3xl mx-auto">
+        <Link 
+          href="/buy-data/plans" 
+          className="group mb-8 inline-flex items-center gap-2 text-sm font-medium text-neutral-500 hover:text-primary transition-colors"
         >
-          Continue to Payment
-        </button>
-      </form>
-      {/* Recent Recipients */}
-      <div className="mt-10">
-        <div className="font-semibold mb-2">Recent Recipients</div>
-        <div className="flex gap-3">
-          {recentRecipients.map(num => (
-            <button
-              key={num}
-              className="rounded-xl bg-[#23232a] px-4 py-3 text-lg font-mono border border-white/10 hover:bg-indigo-500 transition"
-              onClick={() => onRecentSelect(num)}
+          <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+          Back to Plans
+        </Link>
+
+        <header className="mb-10">
+          <h1 className="text-4xl font-black tracking-tight text-neutral-900 dark:text-white mb-2">
+            Recipient Number
+          </h1>
+          <p className="text-neutral-500 dark:text-neutral-400 font-medium">
+            Who are you buying data for?
+          </p>
+        </header>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          <div className="rounded-[2.5rem] border border-neutral-200 dark:border-white/10 bg-white/50 dark:bg-white/5 backdrop-blur-xl p-8 shadow-xl">
+            <Controller
+              name="phone"
+              control={control}
+              render={({ field }) => (
+                <PhoneInput
+                  label="Phone Number"
+                  placeholder="080 1234 5678"
+                  value={autoFormatPhone(field.value)}
+                  onChange={(val) => field.onChange(val.replace(/\s/g, ""))}
+                  onBlur={field.onBlur}
+                  state={errors.phone ? "error" : field.value.length === 11 ? "success" : "default"}
+                  errorMessage={errors.phone?.message}
+                />
+              )}
+            />
+
+            <div className="mt-6 flex flex-col gap-4">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <Controller
+                  name="saveBeneficiary"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="relative flex items-center">
+                      <input
+                        type="checkbox"
+                        className="peer h-6 w-6 cursor-pointer appearance-none rounded-lg border-2 border-neutral-300 dark:border-white/20 transition-all checked:border-primary checked:bg-primary"
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      />
+                      <CheckCircle2 className="pointer-events-none absolute h-6 w-6 scale-0 text-white transition-transform peer-checked:scale-75" />
+                    </div>
+                  )}
+                />
+                <span className="text-sm font-bold text-neutral-600 dark:text-neutral-400 group-hover:text-primary transition-colors">
+                  Save this number as beneficiary
+                </span>
+              </label>
+
+              <AnimatePresence>
+                {saveChecked && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <Controller
+                      name="beneficiaryName"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          label="Beneficiary Nickname"
+                          placeholder="e.g. Mum, Office, My Second Line"
+                          leftIcon={<UserPlus className="h-4 w-4" />}
+                          value={field.value}
+                          onChange={field.onChange}
+                          state={errors.beneficiaryName ? "error" : field.value ? "success" : "default"}
+                          errorMessage={errors.beneficiaryName?.message}
+                        />
+                      )}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Recent Recipients */}
+          <section>
+            <div className="flex items-center gap-2 mb-4 text-neutral-400 dark:text-neutral-500">
+              <Clock className="h-4 w-4" />
+              <h2 className="text-xs font-black uppercase tracking-widest">Recent Recipients</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {recentRecipients.map(num => (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => setValue("phone", num, { shouldValidate: true })}
+                  className={cn(
+                    "group rounded-2xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 p-4 text-left transition-all hover:border-primary/50",
+                    phoneValue === num && "ring-2 ring-primary border-transparent"
+                  )}
+                >
+                  <span className="block text-xs font-bold text-neutral-400 mb-1">Mobile</span>
+                  <span className="block font-black text-neutral-900 dark:text-white group-hover:text-primary transition-colors">
+                    {autoFormatPhone(num)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Saved Beneficiaries */}
+          <section>
+            <div className="flex items-center gap-2 mb-4 text-neutral-400 dark:text-neutral-500">
+              <Users className="h-4 w-4" />
+              <h2 className="text-xs font-black uppercase tracking-widest">Saved Beneficiaries</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-3">
+              {savedBeneficiaries.filter(ben => ben.phone).map(ben => (
+                <button
+                  key={ben.id}
+                  type="button"
+                  onClick={() => setValue("phone", ben.phone as string, { shouldValidate: true })}
+                  className={cn(
+                    "flex items-center gap-4 rounded-3xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-white/5 p-4 transition-all hover:border-primary/50",
+                    phoneValue === ben.phone && "ring-2 ring-primary border-transparent bg-primary/5"
+                  )}
+                >
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary to-secondary font-black text-white shadow-lg">
+                    {ben.name[0]}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <h3 className="font-black text-neutral-900 dark:text-white leading-none mb-1">{ben.name}</h3>
+                    <p className="text-sm font-bold text-neutral-500">{autoFormatPhone(ben.phone as string)}</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-neutral-300 dark:text-neutral-700" />
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <div className="pt-4 flex justify-center">
+            <Button
+              type="submit"
+              size="xl"
+              className="min-w-70 rounded-2xl shadow-2xl shadow-primary/30"
+              disabled={!isValid}
+              rightIcon={<ArrowRight className="h-5 w-5" />}
             >
-              {autoFormatPhone(num)}
-            </button>
-          ))}
-        </div>
+              Continue to Payment
+            </Button>
+          </div>
+        </form>
       </div>
-      {/* Saved Beneficiaries */}
-      <div className="mt-10">
-        <div className="font-semibold mb-2">Saved Beneficiaries</div>
-        <div className="space-y-3">
-          {savedBeneficiaries.filter(ben => ben.phone).map(ben => (
-            <button
-              key={ben.id}
-              className="flex items-center gap-3 rounded-xl bg-[#23232a] px-4 py-3 border border-white/10 hover:bg-green-500 transition"
-              onClick={() => onBeneficiarySelect(ben as { phone: string; name?: string })}
-            >
-              <span className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold text-lg text-white">{ben.name[0]}</span>
-              <span className="font-semibold">{ben.name}</span>
-              <span className="ml-auto font-mono text-lg">{autoFormatPhone(ben.phone as string)}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
+    </main>
   );
 }

@@ -1,12 +1,28 @@
 // ================= TYPES =================
 
-export type TransactionStatus = "success" | "pending" | "failed";
+export type TransactionStatus = "success" | "pending" | "failed" | "processing" | "cancelled";
 
 export type TransactionType =
   | "airtime"
   | "data"
   | "electricity"
-  | "tv";
+  | "tv"
+  | "wallet_credit"
+  | "wallet_debit";
+
+export type Transaction = {
+  id: string;
+  type: TransactionType;
+  amount: number;
+  status: TransactionStatus;
+  provider: string;
+  reference: string;
+  date: string; // ISO string
+  description: string;
+  recipient?: string;
+  fee?: number;
+  paymentMethod?: string;
+};
 
 // ================= USER =================
 
@@ -21,7 +37,7 @@ export const mockUser = {
 
 // ================= TRANSACTIONS =================
 
-export const mockTransactions = [
+export const mockTransactions: Transaction[] = [
   {
     id: "txn_001",
     type: "airtime",
@@ -29,7 +45,11 @@ export const mockTransactions = [
     status: "success",
     provider: "MTN",
     reference: "QKP-982134",
-    date: "2026-03-08",
+    date: "2026-03-08T14:30:00Z",
+    description: "MTN Airtime Top-up",
+    recipient: "08012345678",
+    fee: 0,
+    paymentMethod: "Wallet Balance",
   },
   {
     id: "txn_002",
@@ -38,7 +58,11 @@ export const mockTransactions = [
     status: "success",
     provider: "PHCN",
     reference: "QKP-982135",
-    date: "2026-03-07",
+    date: "2026-03-07T10:15:00Z",
+    description: "PHCN Electricity Bill",
+    recipient: "12345678901",
+    fee: 100,
+    paymentMethod: "Wallet Balance",
   },
   {
     id: "txn_003",
@@ -47,17 +71,47 @@ export const mockTransactions = [
     status: "pending",
     provider: "Airtel",
     reference: "QKP-982136",
-    date: "2026-03-06",
+    date: "2026-03-06T18:00:00Z",
+    description: "Airtel 5GB Data Bundle",
+    recipient: "07012345678",
+    fee: 0,
+    paymentMethod: "Wallet Balance",
+  },
+  {
+    id: "txn_004",
+    type: "wallet_credit",
+    amount: 10000,
+    status: "success",
+    provider: "Bank Transfer",
+    reference: "QKP-982137",
+    date: "2026-03-08T09:00:00Z",
+    description: "Wallet Top-up",
+    recipient: mockUser.name,
+    fee: 0,
+    paymentMethod: "Bank Transfer",
   },
   // Generate 47 more dummy transactions deterministically
   ...Array.from({ length: 47 }, (_, i) => ({
-    id: `txn_${i + 4}`,
-    type: ["airtime", "data", "electricity", "tv"][i % 4],
-    amount: 1000 + (i * 250) % 20000,
-    status: ["success", "pending", "failed"][i % 3],
-    provider: ["MTN", "Airtel", "Glo", "9mobile", "PHCN", "DSTV", "GOTV"][i % 7],
-    reference: `QKP-${100000 + i * 1234}`,
-    date: `2026-03-${String(8 - (i % 10)).padStart(2, "0")}`,
+    id: `txn_${i + 5}`, // Adjusted index for new txn_004
+    type: ["airtime", "data", "electricity", "tv", "wallet_credit", "wallet_debit"][i % 6] as TransactionType,
+    amount: 1000 + (i * 250) % 20000, // Vary amount
+    status: (["success", "pending", "failed", "processing", "cancelled"] as const)[i % 5], // Vary status
+    provider: ["MTN", "Airtel", "Glo", "9mobile", "PHCN", "DSTV", "GOTV", "Bank Transfer"][i % 8], // Vary provider
+    reference: `QKP-${100000 + i * 1234}`, // Unique reference
+    date: (() => {
+      const baseDate = new Date('2024-01-15T12:00:00Z'); // Fixed base date for deterministic generation
+      const transactionDate = new Date(baseDate);
+      transactionDate.setDate(baseDate.getDate() - (i % 30)); // Subtract days deterministically
+      return transactionDate.toISOString();
+    })(),
+    description: `${
+      ["MTN Airtime", "Airtel Data", "PHCN Bill", "DSTV Subscription", "Wallet Top-up", "Wallet Withdrawal"][i % 6]
+    } for ${
+      ["John Doe", "Jane Smith", "08012345678", "12345678901"][i % 4]
+    }`,
+    recipient: ["08012345678", "12345678901", "John Doe"][i % 3],
+    fee: (i % 5 === 0 && ["electricity", "tv"].includes(["airtime", "data", "electricity", "tv", "wallet_credit", "wallet_debit"][i % 6])) ? 50 : 0, // Some fees
+    paymentMethod: ["Wallet Balance", "Card", "Bank Transfer"][i % 3],
   })),
 ];
 

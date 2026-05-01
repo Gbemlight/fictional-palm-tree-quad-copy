@@ -10,6 +10,7 @@ import { Wifi, Mail, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import DashboardLayout from "@/components/dashboard/layout";
 import {
   Dialog,
   DialogHeader,
@@ -20,148 +21,148 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
-type ProviderId = "smile" | "spectranet" | "swift" | "ipnx";
+type ProviderId = "ipnx" | "smile" | "spectranet" | "swift";
 
 type Plan = {
-  id: string;
-  provider: ProviderId;
-  name: string;
   dataGb: number | null;
-  validity: string;
+  id: string;
+  name: string;
   price: number;
-  speed?: string;
+  provider: ProviderId;
   recommended?: boolean;
+  speed?: string;
+  validity: string;
 };
 
 const providers = [
-  { id: "smile", label: "Smile", inputLabel: "Phone Number", inputPlaceholder: "07012345678" },
-  { id: "spectranet", label: "Spectranet", inputLabel: "Account ID", inputPlaceholder: "Enter Spectranet Account ID" },
-  { id: "swift", label: "Swift", inputLabel: "Phone Number", inputPlaceholder: "08012345678" },
-  { id: "ipnx", label: "ipNX", inputLabel: "Account ID", inputPlaceholder: "Enter ipNX Customer ID" },
+  { id: "ipnx", inputLabel: "Account ID", inputPlaceholder: "Enter ipNX Customer ID", label: "ipNX" },
+  { id: "smile", inputLabel: "Phone Number", inputPlaceholder: "07012345678", label: "Smile" },
+  { id: "spectranet", inputLabel: "Account ID", inputPlaceholder: "Enter Spectranet Account ID", label: "Spectranet" },
+  { id: "swift", inputLabel: "Phone Number", inputPlaceholder: "08012345678", label: "Swift" },
 ] as const;
 
 const plans: Plan[] = [
   {
-    id: "smile-10",
-    provider: "smile",
-    name: "Smile 10GB",
     dataGb: 10,
-    validity: "30 Days",
-    price: 3000,
-    speed: "4G LTE",
-  },
-  {
-    id: "smile-25",
-    provider: "smile",
-    name: "Smile 25GB",
-    dataGb: 25,
-    validity: "30 Days",
-    price: 6500,
-    speed: "4G LTE",
-    recommended: true,
-  },
-  {
-    id: "smile-unlimited",
-    provider: "smile",
-    name: "Smile Unlimited",
-    dataGb: null,
-    validity: "30 Days",
-    price: 15000,
-    speed: "Unlimited",
-  },
-  {
-    id: "spectranet-10",
-    provider: "spectranet",
-    name: "Spectranet 10GB",
-    dataGb: 10,
-    validity: "30 Days",
-    price: 3200,
-    speed: "5G Ready",
-  },
-  {
-    id: "spectranet-25",
-    provider: "spectranet",
-    name: "Spectranet 25GB",
-    dataGb: 25,
-    validity: "30 Days",
-    price: 6800,
-    speed: "5G Ready",
-    recommended: true,
-  },
-  {
-    id: "spectranet-unlimited",
-    provider: "spectranet",
-    name: "Spectranet Unlimited",
-    dataGb: null,
-    validity: "30 Days",
-    price: 15500,
-    speed: "Unlimited",
-  },
-  {
-    id: "swift-10",
-    provider: "swift",
-    name: "Swift 10GB",
-    dataGb: 10,
-    validity: "30 Days",
-    price: 3100,
-    speed: "4G",
-  },
-  {
-    id: "swift-25",
-    provider: "swift",
-    name: "Swift 25GB",
-    dataGb: 25,
-    validity: "30 Days",
-    price: 6600,
-    speed: "4G",
-    recommended: true,
-  },
-  {
-    id: "swift-unlimited",
-    provider: "swift",
-    name: "Swift Unlimited",
-    dataGb: null,
-    validity: "30 Days",
-    price: 14800,
-    speed: "Unlimited",
-  },
-  {
     id: "ipnx-10",
-    provider: "ipnx",
     name: "ipNX 10GB",
-    dataGb: 10,
-    validity: "30 Days",
     price: 3500,
+    provider: "ipnx",
     speed: "Fiber / LTE",
+    validity: "30 Days",
   },
   {
-    id: "ipnx-25",
-    provider: "ipnx",
-    name: "ipNX 25GB",
     dataGb: 25,
-    validity: "30 Days",
+    id: "ipnx-25",
+    name: "ipNX 25GB",
     price: 7000,
-    speed: "Fiber / LTE",
+    provider: "ipnx",
     recommended: true,
+    speed: "Fiber / LTE",
+    validity: "30 Days",
   },
   {
-    id: "ipnx-unlimited",
-    provider: "ipnx",
-    name: "ipNX Unlimited",
     dataGb: null,
-    validity: "30 Days",
+    id: "ipnx-unlimited",
+    name: "ipNX Unlimited",
     price: 16000,
+    provider: "ipnx",
     speed: "Unlimited",
+    validity: "30 Days",
+  },
+  {
+    dataGb: 10,
+    id: "smile-10",
+    name: "Smile 10GB",
+    price: 3000,
+    provider: "smile",
+    speed: "4G LTE",
+    validity: "30 Days",
+  },
+  {
+    dataGb: 25,
+    id: "smile-25",
+    name: "Smile 25GB",
+    price: 6500,
+    provider: "smile",
+    recommended: true,
+    speed: "4G LTE",
+    validity: "30 Days",
+  },
+  {
+    dataGb: null,
+    id: "smile-unlimited",
+    name: "Smile Unlimited",
+    price: 15000,
+    provider: "smile",
+    speed: "Unlimited",
+    validity: "30 Days",
+  },
+  {
+    dataGb: 10,
+    id: "spectranet-10",
+    name: "Spectranet 10GB",
+    price: 3200,
+    provider: "spectranet",
+    speed: "5G Ready",
+    validity: "30 Days",
+  },
+  {
+    dataGb: 25,
+    id: "spectranet-25",
+    name: "Spectranet 25GB",
+    price: 6800,
+    provider: "spectranet",
+    recommended: true,
+    speed: "5G Ready",
+    validity: "30 Days",
+  },
+  {
+    dataGb: null,
+    id: "spectranet-unlimited",
+    name: "Spectranet Unlimited",
+    price: 15500,
+    provider: "spectranet",
+    speed: "Unlimited",
+    validity: "30 Days",
+  },
+  {
+    dataGb: 10,
+    id: "swift-10",
+    name: "Swift 10GB",
+    price: 3100,
+    provider: "swift",
+    speed: "4G",
+    validity: "30 Days",
+  },
+  {
+    dataGb: 25,
+    id: "swift-25",
+    name: "Swift 25GB",
+    price: 6600,
+    provider: "swift",
+    recommended: true,
+    speed: "4G",
+    validity: "30 Days",
+  },
+  {
+    dataGb: null,
+    id: "swift-unlimited",
+    name: "Swift Unlimited",
+    price: 14800,
+    provider: "swift",
+    speed: "Unlimited",
+    validity: "30 Days",
   },
 ];
 
 const userEmail = "sadiq@quickpay.app";
 
 const schema = z.object({
-  provider: z.string().min(1, "Select an ISP provider"),
   accountId: z.string().min(1, "Enter your account ID or phone number"),
-  planId: z.string().min(1, "Select a plan"),
   email: z.string().email("Enter a valid email address"),
+  planId: z.string().min(1, "Select a plan"),
+  provider: z.string().min(1, "Select an ISP provider"),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -199,29 +200,29 @@ function naira(value: number) {
 export default function InternetBundlesPage() {
   const {
     control,
-    watch,
-    setValue,
-    handleSubmit,
-    trigger,
     formState: { errors, isValid },
+    handleSubmit,
+    setValue,
+    trigger,
+    watch,
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    mode: "onChange",
     defaultValues: {
-      provider: "",
       accountId: "",
-      planId: "",
       email: userEmail,
+      planId: "",
+      provider: "",
     },
+    mode: "onChange",
+    resolver: zodResolver(schema),
   });
 
-  const selectedProvider = watch("provider");
   const accountId = watch("accountId");
-  const selectedPlanId = watch("planId");
   const email = watch("email");
+  const selectedPlanId = watch("planId");
+  const selectedProvider = watch("provider");
 
-  const [confirmOpen, setConfirmOpen] = React.useState(false);
   const [accountError, setAccountError] = React.useState("");
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
 
   const providerMeta = providers.find((p) => p.id === selectedProvider);
   const filteredPlans = plans.filter((p) => p.provider === selectedProvider);
@@ -248,10 +249,8 @@ export default function InternetBundlesPage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#1a1a1a] px-4 py-8 md:px-8 md:py-10">
-      <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-purple-500/30 blur-[140px]" />
-
-      <div className="relative mx-auto max-w-6xl space-y-6">
+    <DashboardLayout>
+      <div className="relative space-y-6">
         <section className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl md:p-8">
           <div className="flex items-center gap-3">
             <div className="rounded-2xl bg-white/10 p-3">
@@ -292,7 +291,7 @@ export default function InternetBundlesPage() {
                       }
                       className={cn(
                         "rounded-2xl border p-5 text-left transition-all duration-200",
-                        "focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50",
+                        "focus:outline-none focus:ring-2 focus:ring-accent/50",
                         active
                           ? "border-transparent bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))] text-white shadow-[0_12px_24px_rgba(236,72,153,0.22)]"
                           : "border-white/15 bg-white/5 text-white/85 hover:bg-white/10"
@@ -308,7 +307,7 @@ export default function InternetBundlesPage() {
               </div>
 
               {errors.provider && (
-                <p className="mt-3 text-sm text-[var(--color-danger)]">
+                <p className="mt-3 text-sm text-danger">
                   {errors.provider.message}
                 </p>
               )}
@@ -388,7 +387,7 @@ export default function InternetBundlesPage() {
                         }
                         className={cn(
                           "relative rounded-3xl border p-5 text-left transition-all",
-                          "focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50",
+                          "focus:outline-none focus:ring-2 focus:ring-accent/50",
                           active
                             ? "border-transparent bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))] text-white shadow-[0_16px_32px_rgba(124,58,237,0.26)]"
                             : "border-white/15 bg-white/5 text-white/85 hover:bg-white/10"
@@ -439,7 +438,7 @@ export default function InternetBundlesPage() {
               )}
 
               {errors.planId && (
-                <p className="mt-3 text-sm text-[var(--color-danger)]">
+                <p className="mt-3 text-sm text-danger">
                   {errors.planId.message}
                 </p>
               )}
@@ -582,6 +581,6 @@ export default function InternetBundlesPage() {
           </Button>
         </DialogFooter>
       </Dialog>
-    </main>
+    </DashboardLayout>
   );
 }

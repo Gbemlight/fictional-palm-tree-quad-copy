@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#0f0f14]">
+    <main className="flex min-h-screen items-center justify-center bg-white dark:bg-[#0f0f14] transition-colors duration-300">
       <div className="text-center space-y-6">
-        <h1 className="text-4xl font-bold text-white">
+        <h1 className="text-4xl font-bold text-neutral-900 dark:text-white">
           QuickPay UI Demo
         </h1>
 
-        <p className="text-white/60">
+        <p className="text-neutral-500 dark:text-white/60">
           Transactions management preview
         </p>
 

@@ -1,7 +1,9 @@
+"use client";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import * as Dialog from "@radix-ui/react-dialog";
 import { Bell, User, LogOut, Settings, Search, ChevronRight, ChevronLeft, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +22,7 @@ const user = {
 };
 
 function getBreadcrumbs(pathname: string) {
+  if (!pathname) return [];
   const parts = pathname.split("/").filter(Boolean);
   const crumbs = parts.map((part, idx) => ({
     label: part.charAt(0).toUpperCase() + part.slice(1),
@@ -28,17 +31,16 @@ function getBreadcrumbs(pathname: string) {
   return crumbs;
 }
 
-function getPageTitle(pathname: string) {
-  const crumbs = getBreadcrumbs(pathname);
-  if (crumbs.length === 0) return "Dashboard";
-  return crumbs[crumbs.length - 1].label;
-}
-
 export function DashboardHeader() {
   const pathname = usePathname();
   const [searchOpen, setSearchOpen] = useState(false);
   const [headerSticky, setHeaderSticky] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Keyboard shortcut for search
   useEffect(() => {
@@ -69,41 +71,45 @@ export function DashboardHeader() {
   }, [searchOpen]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
+  const displayUnreadCount = unreadCount > 99 ? "99+" : unreadCount;
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 w-full backdrop-blur supports-[backdrop-filter]:bg-[#18181b]/80 border-b border-transparent",
-        headerSticky && "bg-[#23232a]/90 border-b border-cyan-400/20",
-        "transition-colors duration-200 shadow-lg"
+        "sticky top-0 z-40 w-full backdrop-blur transition-all duration-300",
+        headerSticky 
+          ? "bg-white/80 dark:bg-neutral-900/80 shadow-lg" 
+          : "bg-transparent",
+        "px-4 py-2 md:px-8"
       )}
-      style={{ borderImage: "linear-gradient(to right, #6366f1, #06b6d4) 1" }}
     >
-      <div className="flex items-center justify-between px-4 py-2 md:px-8">
+      {/* Gradient bottom border line */}
+      <div className="absolute bottom-0 left-0 h-px w-full bg-linear-to-r from-transparent via-primary/30 to-transparent" />
+
+      <div className="flex items-center justify-between h-12">
         {/* Left: Breadcrumbs & Title */}
         <div className="flex items-center gap-2 min-w-0">
-          <nav className="flex items-center text-sm text-gray-400 gap-1">
-            <Link href="/" className="hover:text-cyan-400 font-medium">Home</Link>
-            {getBreadcrumbs(pathname).map((crumb, idx) => (
+          <nav className="flex items-center text-sm text-neutral-500 dark:text-neutral-400 gap-1">
+            <Link href="/dashboard" className="hover:text-primary transition-colors font-medium">Home</Link>
+            {isMounted && getBreadcrumbs(pathname || "").map((crumb, idx, array) => (
               <React.Fragment key={crumb.href}>
-                <ChevronRight className="w-4 h-4 mx-1 text-gray-600" />
-                <Link href={crumb.href} className={cn("hover:text-cyan-400", idx === getBreadcrumbs(pathname).length - 1 && "font-semibold text-white truncate max-w-[120px] md:max-w-xs overflow-hidden text-ellipsis")}>{crumb.label}</Link>
+                <ChevronRight className="w-4 h-4 mx-1 text-neutral-300 dark:text-neutral-600" />
+                <Link href={crumb.href} className={cn("hover:text-primary transition-colors", idx === array.length - 1 && "font-semibold text-neutral-900 dark:text-white truncate max-w-30 md:max-w-xs overflow-hidden text-ellipsis")}>{crumb.label}</Link>
               </React.Fragment>
             ))}
           </nav>
-          <span className="ml-4 text-lg font-bold text-white truncate max-w-[160px] md:max-w-md">{getPageTitle(pathname)}</span>
         </div>
 
         {/* Center: Search bar (hidden on mobile) */}
         <div className="hidden md:flex flex-1 justify-center">
           <button
-            className="group flex items-center gap-2 px-4 py-2 bg-[#23232a] border border-cyan-400/20 rounded-full shadow hover:bg-[#23232a]/80 focus:outline-none focus:ring-2 focus:ring-cyan-400/30 text-gray-200 min-w-[260px]"
+            className="group flex items-center gap-2 px-4 py-2 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-full shadow-sm hover:border-primary/50 transition-all focus:outline-none focus:ring-2 focus:ring-primary/20 text-neutral-600 dark:text-neutral-200 min-w-65"
             onClick={() => setSearchOpen(true)}
             aria-label="Open search"
           >
-            <Search className="w-5 h-5 text-gray-400 group-hover:text-cyan-400" />
-            <span className="text-gray-400 group-hover:text-cyan-400">Search...</span>
-            <span className="ml-auto text-xs text-gray-400 bg-[#18181b] rounded px-2 py-0.5 border border-cyan-400/20">⌘K</span>
+            <Search className="w-4 h-4 text-neutral-400 group-hover:text-primary transition-colors" />
+            <span className="text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors">Search...</span>
+            <span className="ml-auto text-[10px] font-bold text-neutral-400 bg-white dark:bg-neutral-900 rounded px-1.5 py-0.5 border border-neutral-200 dark:border-white/10">⌘K</span>
           </button>
         </div>
 
@@ -111,7 +117,7 @@ export function DashboardHeader() {
         <div className="flex items-center gap-2">
           {/* Search icon for mobile */}
           <button
-            className="md:hidden p-2 rounded-full hover:bg-[#23232a]/80 text-gray-200"
+            className="md:hidden p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 transition-colors"
             onClick={() => setSearchOpen(true)}
             aria-label="Open search"
           >
@@ -121,108 +127,109 @@ export function DashboardHeader() {
           {/* Notification bell */}
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <button className="relative p-2 rounded-full hover:bg-[#23232a]/80 text-gray-200 focus:outline-none">
+              <button className="relative p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-600 dark:text-neutral-400 transition-colors focus:outline-none">
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] flex items-center justify-center font-bold">
-                    {unreadCount > 99 ? "99+" : unreadCount}
+                  <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white border-2 border-white dark:border-neutral-900">
+                    {displayUnreadCount}
                   </span>
                 )}
               </button>
             </DropdownMenu.Trigger>
-            <DropdownMenu.Content align="end" className="w-80 bg-[#23232a] shadow-lg rounded-xl p-2 mt-2 border border-cyan-400/10">
-              <div className="font-semibold text-white px-2 py-1">Notifications</div>
-              <div className="divide-y divide-gray-100 max-h-60 overflow-y-auto">
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content align="end" sideOffset={8} className="w-80 bg-white dark:bg-neutral-900 shadow-2xl rounded-2xl p-2 border border-neutral-200 dark:border-white/10 z-50 animate-in fade-in zoom-in duration-200">
+                <div className="font-bold text-neutral-900 dark:text-white px-3 py-2 text-sm">Notifications</div>
+                <div className="max-h-64 overflow-y-auto scrollbar-hide">
                 {notifications.length === 0 ? (
-                  <div className="text-gray-400 px-2 py-4 text-center">No notifications</div>
+                  <div className="text-neutral-400 px-2 py-8 text-center text-sm">No notifications</div>
                 ) : (
                   notifications.slice(0, 5).map((n) => (
-                    <div key={n.id} className={cn("px-2 py-2 flex items-start gap-2", !n.read && "bg-cyan-900/30") }>
-                      <span className={cn("w-2 h-2 rounded-full mt-2", n.read ? "bg-gray-700" : "bg-cyan-400")}></span>
+                    <div key={n.id} className={cn("px-3 py-3 rounded-xl flex items-start gap-3 transition-colors hover:bg-neutral-50 dark:hover:bg-white/5", !n.read && "bg-primary/5") }>
+                      <span className={cn("w-2 h-2 rounded-full mt-1.5 shrink-0", n.read ? "bg-neutral-200 dark:bg-neutral-700" : "bg-primary shadow-[0_0_8px_rgba(124,58,237,0.5)]")}></span>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm text-white truncate">{n.message}</div>
-                        <div className="text-xs text-gray-400">{n.time}</div>
+                        <div className="text-sm font-medium text-neutral-900 dark:text-neutral-200 truncate">{n.message}</div>
+                        <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">{n.time}</div>
                       </div>
                     </div>
                   ))
                 )}
               </div>
-              <Link href="/notifications" className="block text-center text-cyan-400 font-medium py-2 hover:underline">View All</Link>
-            </DropdownMenu.Content>
+                <Link href="/settings?tab=notifications" className="block text-center text-primary text-xs font-bold py-3 hover:bg-neutral-50 dark:hover:bg-white/5 rounded-xl transition-colors mt-1">View All Notifications</Link>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
           </DropdownMenu.Root>
 
           {/* User avatar & menu */}
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
-              <button className="ml-2 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/30">
-                <img src={user.avatar} alt="User avatar" className="w-8 h-8 rounded-full border border-gray-200" />
+              <button className="ml-2 p-0.5 rounded-full border-2 border-transparent hover:border-primary/30 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-95">
+                <img src={user.avatar} alt="User avatar" className="w-8 h-8 rounded-full shadow-sm" />
               </button>
             </DropdownMenu.Trigger>
-            <DropdownMenu.Content align="end" className="w-48 bg-[#23232a] shadow-lg rounded-xl p-2 mt-2 border border-cyan-400/10">
-              <div className="px-2 py-2 border-b border-cyan-400/10">
-                <div className="font-semibold text-white">{user.name}</div>
-                <div className="text-xs text-gray-400 truncate">{user.email}</div>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content align="end" sideOffset={8} className="w-56 bg-white dark:bg-neutral-900 shadow-2xl rounded-2xl p-2 border border-neutral-200 dark:border-white/10 z-50 animate-in fade-in zoom-in duration-200">
+                <div className="px-3 py-3 mb-2 bg-neutral-50 dark:bg-white/5 rounded-xl">
+                  <div className="font-bold text-neutral-900 dark:text-white text-sm">{user.name}</div>
+                  <div className="text-[10px] font-medium text-neutral-500 truncate uppercase tracking-widest">{user.email}</div>
               </div>
               <DropdownMenu.Item asChild>
-                <Link href="/profile" className="flex items-center gap-2 px-2 py-2 rounded hover:bg-cyan-900/30 text-white">
-                  <User className="w-4 h-4 text-cyan-400" /> Profile
+                <Link href="/settings?tab=profile" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 hover:text-primary transition-colors outline-none cursor-pointer">
+                  <User className="w-4 h-4" /> Profile
                 </Link>
               </DropdownMenu.Item>
               <DropdownMenu.Item asChild>
-                <Link href="/settings" className="flex items-center gap-2 px-2 py-2 rounded hover:bg-cyan-900/30 text-white">
-                  <Settings className="w-4 h-4 text-cyan-400" /> Settings
+                <Link href="/settings" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 hover:text-primary transition-colors outline-none cursor-pointer">
+                  <Settings className="w-4 h-4" /> Settings
                 </Link>
               </DropdownMenu.Item>
-              <DropdownMenu.Separator className="my-1" />
+              <DropdownMenu.Separator className="h-px bg-neutral-200 dark:bg-neutral-800 my-1 mx-2" />
               <DropdownMenu.Item asChild>
-                <button className="flex items-center gap-2 px-2 py-2 rounded hover:bg-cyan-900/30 w-full text-left text-white">
-                  <LogOut className="w-4 h-4 text-cyan-400" /> Logout
+                <button className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 w-full text-left transition-colors outline-none cursor-pointer">
+                  <LogOut className="w-4 h-4" /> Logout
                 </button>
               </DropdownMenu.Item>
-            </DropdownMenu.Content>
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
           </DropdownMenu.Root>
         </div>
       </div>
 
       {/* Search Modal */}
-      {searchOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-center"
-          style={{ paddingTop: '16px' }}
-          onClick={e => {
-            if (e.target === e.currentTarget) setSearchOpen(false);
-          }}
-        >
-          <div
-            className="relative w-full max-w-lg p-0"
-            style={{ position: 'relative', marginTop: '8px' }}
+      <Dialog.Root open={searchOpen} onOpenChange={setSearchOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300" />
+          <Dialog.Content 
+            className="fixed left-1/2 top-[15%] z-50 w-full max-w-lg -translate-x-1/2 outline-none animate-in fade-in zoom-in-95 duration-200 px-4"
           >
-            <div className="bg-[#18181b] rounded-2xl shadow-2xl border border-cyan-400/10 p-4 w-full flex flex-col justify-center items-center"
-                 style={{ boxSizing: 'border-box', position: 'relative' }}>
+            <Dialog.Title className="sr-only">Search</Dialog.Title>
+            <Dialog.Description className="sr-only">Search for transactions, bills, or help.</Dialog.Description>
+            
+            <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl border border-neutral-200 dark:border-white/10 p-4 flex flex-col items-center">
               <div className="flex justify-end w-full mb-2">
-                <button
-                  className="p-2 text-gray-400 hover:text-cyan-400 z-20"
-                  onClick={() => setSearchOpen(false)}
-                  aria-label="Close search"
-                >
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M18 6 6 18M6 6l12 12"/></svg>
-                </button>
+                <Dialog.Close asChild>
+                  <button className="p-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-white transition-colors" aria-label="Close search">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M18 6 6 18M6 6l12 12"/></svg>
+                  </button>
+                </Dialog.Close>
               </div>
-              <div className="flex items-center gap-2 mb-4 w-full mt-2">
-                <Search className="w-5 h-5 text-cyan-400" />
+              
+              <div className="flex items-center gap-3 mb-4 w-full px-2 py-1 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-white/10 rounded-xl focus-within:ring-2 focus-within:ring-primary/30 transition-all">
+                <Search className="w-5 h-5 text-neutral-400" />
                 <input
                   ref={searchInputRef}
-                  className="flex-1 px-3 py-2 bg-[#23232a] text-white border border-cyan-400/10 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400/30 placeholder:text-gray-400"
-                  placeholder="Search..."
+                  className="flex-1 bg-transparent py-2 text-neutral-900 dark:text-white outline-none placeholder:text-neutral-400 text-sm"
+                  placeholder="Search transactions, bills, or help..."
                   aria-label="Search"
                 />
-                <span className="ml-2 text-xs text-cyan-400 bg-[#18181b] rounded px-2 py-0.5 border border-cyan-400/20">⌘K</span>
+                <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-white dark:bg-neutral-900 px-1.5 font-mono text-[10px] font-medium text-neutral-400">
+                  <span className="text-xs">⌘</span>K
+                </kbd>
               </div>
-              <div className="text-gray-400 text-sm w-full text-left">Type to search (demo only)</div>
+              <div className="text-neutral-400 text-[10px] w-full text-left font-bold uppercase tracking-widest px-1">Quick results</div>
             </div>
-          </div>
-        </div>
-      )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </header>
   );
 }

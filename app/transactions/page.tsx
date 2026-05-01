@@ -1,563 +1,354 @@
 "use client";
-import React from "react";
-import { Button } from "../../components/ui/button";
-
-import { mockTransactions } from "../../lib/dummy-data";
-import { format } from "date-fns";
-const TransactionsPage = () => {
-  // Filters state
-  const [type, setType] = React.useState("all");
-  const [status, setStatus] = React.useState("all");
-  const [dateFrom, setDateFrom] = React.useState("");
-  const [dateTo, setDateTo] = React.useState("");
-  const [search, setSearch] = React.useState("");
-  const [page, setPage] = React.useState(1);
-  const [expandedRows, setExpandedRows] = React.useState<{ [id: string]: boolean }>({});
-  const pageSize = 10;
-
-  // Compound filtering
-  const filteredTxns = mockTransactions.filter((txn) => {
-    let match = true;
-    if (type !== "all") match = match && txn.type === type;
-    if (status !== "all") match = match && txn.status === status;
-    if (dateFrom) match = match && txn.date >= dateFrom;
-    if (dateTo) match = match && txn.date <= dateTo;
-    if (search) {
-      const s = search.toLowerCase();
-      match =
-        match &&
-        (txn.reference.toLowerCase().includes(s) ||
-          (txn.provider && txn.provider.toLowerCase().includes(s)) ||
-          (txn.description && txn.description.toLowerCase().includes(s)));
-    }
-    return match;
-  });
-  const totalTransactions = filteredTxns.length;
-  const totalSpent = filteredTxns.reduce((sum, txn) => sum + txn.amount, 0);
-  const successCount = filteredTxns.filter((txn) => txn.status === "success").length;
-  const successRate = totalTransactions > 0 ? Math.round((successCount / totalTransactions) * 100) : 0;
-  const pagedTxns = filteredTxns.slice((page - 1) * pageSize, page * pageSize);
-
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-[#000000] p-6">
-      <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-purple-500/30 blur-[140px]" />
-      <h1 className="text-2xl font-bold mb-4 text-white">Transaction History</h1>
-      {/* Stats summary */}
-      <div className="flex flex-wrap gap-4 mb-6">
-        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg p-4 min-w-[180px]">
-          <div className="text-sm text-white/70">Total Transactions</div>
-          <div className="text-2xl font-bold text-white">{totalTransactions}</div>
-        </div>
-        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg p-4 min-w-[180px]">
-          <div className="text-sm text-white/70">Total Spent</div>
-          <div className="text-2xl font-bold text-white">₦{totalSpent.toLocaleString('en-US')}</div>
-        </div>
-        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg p-4 min-w-[180px]">
-          <div className="text-sm text-white/70">Success Rate</div>
-          <div className="text-2xl font-bold text-white">{successRate}%</div>
-        </div>
-      </div>
-      {/* Filter bar */}
-      <div className="flex flex-wrap gap-4 mb-6 items-center bg-[#23232a]/60 rounded-xl p-4 shadow-md">
-        {/* Type filter */}
-        <select className="border rounded px-3 py-2 bg-[#23232a] text-cyan-400 border-cyan-400/20" value={type} onChange={e => { setType(e.target.value); setPage(1); }}>
-          <option value="all">All Types</option>
-          <option value="airtime">Airtime</option>
-          <option value="data">Data</option>
-          <option value="bills">Bills</option>
-          <option value="wallet">Wallet</option>
-        </select>
-        {/* Status filter */}
-        <select className="border rounded px-3 py-2 bg-[#23232a] text-cyan-400 border-cyan-400/20" value={status} onChange={e => { setStatus(e.target.value); setPage(1); }}>
-          <option value="all">All Status</option>
-          <option value="success">Success</option>
-          <option value="failed">Failed</option>
-          <option value="pending">Pending</option>
-        </select>
-        {/* Date range picker */}
-        <input type="date" className="border rounded px-3 py-2 bg-[#23232a] text-cyan-400 border-cyan-400/20" value={dateFrom} onChange={e => { setDateFrom(e.target.value); setPage(1); }} />
-        <span className="mx-2 text-white/70">to</span>
-        <input type="date" className="border rounded px-3 py-2 bg-[#23232a] text-cyan-400 border-cyan-400/20" value={dateTo} onChange={e => { setDateTo(e.target.value); setPage(1); }} />
-      </div>
-      {/* Search bar */}
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Search by reference, recipient, or description"
-          className="border rounded px-3 py-2 w-full max-w-md bg-[#23232a] text-cyan-400 border-cyan-400/20 placeholder:text-cyan-400 shadow-md"
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1); }}
-        />
-      </div>
-      {/* Export as CSV button */}
-      <div className="mb-6 flex justify-end">
-        <Button variant="primary" size="md" onClick={() => alert("Exported as CSV (dummy action)")}>
-          Export as CSV
-        </Button>
-      </div>
-      {/* Transaction list grouped by date */}
-      <div>
-        {/* Group transactions by date */}
-        {(() => {
-          const now = new Date();
-          const today = format(now, "yyyy-MM-dd");
-          const yesterday = format(new Date(now.setDate(now.getDate() - 1)), "yyyy-MM-dd");
-          const last7 = Array.from({ length: 7 }, (_, i) => format(new Date(Date.now() - i * 86400000), "yyyy-MM-dd"));
-          const groups = {
-            Today: [],
-            Yesterday: [],
-            "Last 7 days": [],
-            Older: [],
-          };
-          pagedTxns.forEach((txn) => {
-            if (txn.date === today) groups.Today.push(txn);
-            else if (txn.date === yesterday) groups.Yesterday.push(txn);
-            else if (last7.includes(txn.date)) groups["Last 7 days"].push(txn);
-            else groups.Older.push(txn);
-          });
-          return (
-            <>
-              {Object.entries(groups).map(([label, txns]) =>
-                txns.length > 0 ? (
-                  <div key={label} className="mb-8">
-                    <div className="text-lg font-semibold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400 drop-shadow">{label}</div>
-                    <div className="divide-y divide-cyan-400/10 rounded-xl overflow-hidden shadow-md">
-                      {txns.map((txn) => {
-                        const expanded = !!expandedRows[txn.id];
-                        return (
-                          <div key={txn.id}>
-                            <div
-                              className="flex items-center py-3 cursor-pointer hover:bg-[#23232a]/80 transition-colors group"
-                              onClick={() => setExpandedRows((prev) => ({ ...prev, [txn.id]: !prev[txn.id] }))}
-                            >
-                              {/* Service icon placeholder */}
-                              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full flex items-center justify-center mr-4 shadow-lg group-hover:scale-105 transition-transform">
-                                <span className="text-xs capitalize text-white font-bold drop-shadow">{txn.type}</span>
-                              </div>
-                              {/* Description */}
-                              <div className="flex-1">
-                                <div className="font-medium text-white drop-shadow">{txn.provider} {txn.type}</div>
-                                <div className="text-xs text-cyan-400">Ref: {txn.reference}</div>
-                              </div>
-                              {/* Amount */}
-                              <div className="font-semibold mr-4 text-white drop-shadow">₦{txn.amount.toLocaleString('en-US')}</div>
-                              {/* Status badge */}
-                              <span className={
-                                txn.status === "success"
-                                  ? "bg-lime-400/20 text-lime-400 px-2 py-1 rounded text-xs font-semibold"
-                                  : txn.status === "failed"
-                                  ? "bg-red-400/20 text-red-400 px-2 py-1 rounded text-xs font-semibold"
-                                  : "bg-amber-400/20 text-amber-400 px-2 py-1 rounded text-xs font-semibold"
-                              }>
-                                {txn.status.charAt(0).toUpperCase() + txn.status.slice(1)}
-                              </span>
-                              {/* Timestamp */}
-                              <div className="ml-4 text-xs text-cyan-400">{txn.date}</div>
-                            </div>
-                            {expanded && (
-                              <div className="bg-gradient-to-r from-[#23232a] via-[#18181b] to-[#7c3aed] p-4 rounded-xl mt-2 mb-2 border border-cyan-400/10 shadow-lg">
-                                <div className="mb-2 font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-cyan-400 to-pink-400">Transaction Details</div>
-                                <div className="grid grid-cols-2 gap-2 text-sm text-white">
-                                  <div>Reference: {txn.reference}</div>
-                                  <div>Provider: {txn.provider}</div>
-                                  <div>Type: {txn.type}</div>
-                                  <div>Status: {txn.status}</div>
-                                  <div>Amount: ₦{txn.amount.toLocaleString('en-US')}</div>
-                                  <div>Date: {txn.date}</div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : null
-              )}
-              {/* Pagination controls */}
-              <div className="flex justify-center mt-6">
-                <Button variant="primary" size="md" className="mr-2" disabled={page === 1} onClick={() => setPage(page - 1)}>
-                  Previous
-                </Button>
-                <Button variant="primary" size="md" disabled={page * pageSize >= filteredTxns.length} onClick={() => setPage(page + 1)}>
-                  Next
-                </Button>
-              </div>
-            </>
-          );
-        })()}
-      </div>
-    </div>
-  );
-};
-
-export default TransactionsPage;
-
-"use client";
 
 import * as React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Search,
   Download,
-  ChevronDown,
-  ChevronUp,
-  Smartphone,
-  Wifi,
-  Receipt,
-  Wallet,
+  Filter,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Clock,
   CheckCircle2,
-  Clock3,
   XCircle,
+  Loader2,
+  Ban,
+  Repeat,
+  Info,
+  Flag
 } from "lucide-react";
-import { format, isToday, isYesterday, subDays, isAfter } from "date-fns";
+import { format, isToday, isYesterday, differenceInDays, parseISO } from "date-fns";
 
+import DashboardLayout from "@/components/dashboard/layout";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
+import type { SelectOption } from "@/components/ui/select";
+import { mockTransactions } from "@/lib/dummy-data";
+import type { Transaction, TransactionType } from "@/lib/dummy-data";
 import { cn } from "@/lib/utils";
+import { StatusIndicator } from "./status-indicator";
+import type { TransactionStatus } from "./status-indicator";
+import { toastInfo } from "@/components/ui/toast";
 
-type TxType = "airtime" | "data" | "bills" | "wallet";
-type TxStatus = "success" | "failed" | "pending";
+const TRANSACTION_TYPES_OPTIONS: SelectOption[] = [
+  { value: "All", label: "All" },
+  { value: "Airtime", label: "Airtime" },
+  { value: "Data", label: "Data" },
+  { value: "Bills", label: "Bills" }, // Assuming "Bills" maps to electricity/tv
+  { value: "Wallet", label: "Wallet" }, // Assuming "Wallet" maps to wallet_credit/debit
+];
+const TRANSACTION_STATUSES_OPTIONS: SelectOption[] = [
+  { value: "All", label: "All" },
+  { value: "Success", label: "Success" },
+  { value: "Failed", label: "Failed" },
+  { value: "Pending", label: "Pending" },
+  { value: "Processing", label: "Processing" },
+  { value: "Cancelled", label: "Cancelled" },
+];
+const DATE_FILTERS = [
+  { label: "All Time", value: "all" },
+  { label: "Last 7 Days", value: "7" },
+  { label: "Last 30 Days", value: "30" },
+  { label: "Custom", value: "custom" },
+];
 
-type Transaction = {
-  id: string;
-  reference: string;
-  type: TxType;
-  status: TxStatus;
-  description: string;
-  recipient?: string;
-  amount: number;
-  createdAt: string;
+const getServiceIcon = (type: TransactionType) => {
+  switch (type) {
+    case "airtime": return <span className="text-lg">📱</span>;
+    case "data": return <span className="text-lg">📶</span>;
+    case "electricity": return <span className="text-lg">💡</span>;
+    case "tv": return <span className="text-lg">📺</span>;
+    case "wallet_credit": return <ArrowUpRight className="h-5 w-5 text-emerald-500" />;
+    case "wallet_debit": return <ArrowDownLeft className="h-5 w-5 text-rose-500" />;
+    default: return <span className="text-lg">💸</span>;
+  }
 };
 
-const typeOptions = [
-  { value: "all", label: "All" },
-  { value: "airtime", label: "Airtime" },
-  { value: "data", label: "Data" },
-  { value: "bills", label: "Bills" },
-  { value: "wallet", label: "Wallet" },
-];
-
-const statusOptions = [
-  { value: "all", label: "All" },
-  { value: "success", label: "Success" },
-  { value: "failed", label: "Failed" },
-  { value: "pending", label: "Pending" },
-];
-
-function makeTransactions(): Transaction[] {
-  const base: Transaction[] = [];
-  const now = new Date();
-
-  const types: TxType[] = ["airtime", "data", "bills", "wallet"];
-  const statuses: TxStatus[] = ["success", "pending", "failed"];
-
-  for (let i = 0; i < 56; i++) {
-    const type = types[i % types.length];
-    const status = statuses[i % statuses.length];
-    const daysAgo = i % 16;
-    const date = subDays(now, daysAgo);
-
-    base.push({
-      id: `tx_${i + 1}`,
-      reference: `QKP-${100000 + i}`,
-      type,
-      status,
-      description:
-        type === "airtime"
-          ? "Airtime Purchase"
-          : type === "data"
-          ? "Data Bundle Purchase"
-          : type === "bills"
-          ? "Utility Bill Payment"
-          : "Wallet Funding",
-      recipient:
-        type === "wallet" ? undefined : `080${String(10000000 + i).slice(0, 8)}`,
-      amount:
-        type === "wallet"
-          ? 5000 + i * 100
-          : type === "bills"
-          ? 3000 + i * 250
-          : 500 + i * 100,
-      createdAt: date.toISOString(),
-    });
-  }
-
-  return base.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-}
-
-const allTransactions = makeTransactions();
-
-function getTypeIcon(type: TxType) {
-  if (type === "airtime") return <Smartphone className="h-5 w-5" />;
-  if (type === "data") return <Wifi className="h-5 w-5" />;
-  if (type === "bills") return <Receipt className="h-5 w-5" />;
-  return <Wallet className="h-5 w-5" />;
-}
-
-function getStatusBadge(status: TxStatus) {
-  if (status === "success") return <Badge variant="success">Success</Badge>;
-  if (status === "failed") return <Badge variant="failed">Failed</Badge>;
-  return <Badge variant="pending" dot>Pending</Badge>;
-}
-
-function groupLabel(date: Date) {
-  if (isToday(date)) return "Today";
-  if (isYesterday(date)) return "Yesterday";
-  if (isAfter(date, subDays(new Date(), 7))) return "Last 7 days";
-  return "Older";
-}
+const formatAmount = (amount: number) => {
+  return `\u20A6${amount.toLocaleString(undefined, {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  })}`;
+};
 
 export default function TransactionsPage() {
-  const [typeFilter, setTypeFilter] = React.useState("all");
-  const [statusFilter, setStatusFilter] = React.useState("all");
-  const [dateRange, setDateRange] = React.useState("all");
-  const [search, setSearch] = React.useState("");
-  const [visibleCount, setVisibleCount] = React.useState(20);
-  const [expandedId, setExpandedId] = React.useState<string | null>(null);
+  const router = useRouter();
+  const [typeFilter, setTypeFilter] = React.useState<string>("All");
+  const [statusFilter, setStatusFilter] = React.useState<string>("All");
+  const [dateFilter, setDateFilter] = React.useState<string>("all");
+  const [searchTerm, setSearchTerm] = React.useState<string>("");
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const transactionsPerPage = 10;
 
-  const filtered = React.useMemo(() => {
-    const q = search.trim().toLowerCase();
+  const filteredTransactions = React.useMemo(() => {
+    let filtered = mockTransactions;
 
-    return allTransactions.filter((tx) => {
-      const matchesType = typeFilter === "all" || tx.type === typeFilter;
-      const matchesStatus = statusFilter === "all" || tx.status === statusFilter;
+    // Type filter
+    if (typeFilter !== "All") {
+      filtered = filtered.filter((tx) => {
+        if (typeFilter === "Bills") {
+          return tx.type === "electricity" || tx.type === "tv";
+        }
+        if (typeFilter === "Wallet") {
+          return tx.type === "wallet_credit" || tx.type === "wallet_debit";
+        }
+        return tx.type === typeFilter.toLowerCase();
+      });
+    }
 
-      const txDate = new Date(tx.createdAt);
-      const matchesDate =
-        dateRange === "all" ||
-        (dateRange === "7" && isAfter(txDate, subDays(new Date(), 7))) ||
-        (dateRange === "30" && isAfter(txDate, subDays(new Date(), 30)));
+    // Status filter
+    if (statusFilter !== "All") {
+      filtered = filtered.filter((tx) => tx.status === statusFilter.toLowerCase());
+    }
 
-      const matchesSearch =
-        !q ||
-        tx.reference.toLowerCase().includes(q) ||
-        tx.description.toLowerCase().includes(q) ||
-        (tx.recipient ?? "").toLowerCase().includes(q);
+    // Date filter
+    if (dateFilter !== "all") {
+      const now = new Date();
+      filtered = filtered.filter((tx) => {
+        const txDate = parseISO(tx.date);
+        if (dateFilter === "7") {
+          return differenceInDays(now, txDate) <= 7;
+        }
+        if (dateFilter === "30") {
+          return differenceInDays(now, txDate) <= 30;
+        }
+        // Custom date range logic would go here if implemented
+        return true;
+      });
+    }
 
-      return matchesType && matchesStatus && matchesDate && matchesSearch;
+    // Search filter
+    if (searchTerm) {
+      const lowerCaseSearchTerm = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (tx) =>
+          tx.reference.toLowerCase().includes(lowerCaseSearchTerm) ||
+          tx.recipient?.toLowerCase().includes(lowerCaseSearchTerm) ||
+          tx.description.toLowerCase().includes(lowerCaseSearchTerm) ||
+          tx.provider.toLowerCase().includes(lowerCaseSearchTerm)
+      );
+    }
+
+    // Sort by date descending
+    return filtered.sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+  }, [typeFilter, statusFilter, dateFilter, searchTerm]);
+
+  const totalTransactions = filteredTransactions.length;
+  const totalSpent = filteredTransactions.reduce((sum, tx) => sum + tx.amount + (tx.fee || 0), 0);
+  const successfulTransactions = filteredTransactions.filter(tx => tx.status === "success").length;
+  const successRate = totalTransactions > 0 ? ((successfulTransactions / totalTransactions) * 100).toFixed(1) : "0.0";
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
+  const paginatedTransactions = filteredTransactions.slice(
+    (currentPage - 1) * transactionsPerPage,
+    currentPage * transactionsPerPage
+  );
+
+  const groupedTransactions = React.useMemo(() => {
+    const groups: { [key: string]: Transaction[] } = {};
+    paginatedTransactions.forEach((tx) => {
+      const txDate = parseISO(tx.date);
+      let groupKey: string;
+      if (isToday(txDate)) {
+        groupKey = "Today";
+      } else if (isYesterday(txDate)) {
+        groupKey = "Yesterday";
+      } else if (differenceInDays(new Date(), txDate) <= 7) {
+        groupKey = "Last 7 Days";
+      } else {
+        groupKey = "Older";
+      }
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(tx);
     });
-  }, [typeFilter, statusFilter, dateRange, search]);
+    return groups;
+  }, [paginatedTransactions]);
 
-  const visibleTransactions = filtered.slice(0, visibleCount);
-
-  const grouped = React.useMemo(() => {
-    return visibleTransactions.reduce<Record<string, Transaction[]>>((acc, tx) => {
-      const label = groupLabel(new Date(tx.createdAt));
-      if (!acc[label]) acc[label] = [];
-      acc[label].push(tx);
-      return acc;
-    }, {});
-  }, [visibleTransactions]);
-
-  const totalSpent = filtered.reduce((sum, tx) => sum + tx.amount, 0);
-  const successCount = filtered.filter((tx) => tx.status === "success").length;
-  const successRate = filtered.length
-    ? Math.round((successCount / filtered.length) * 100)
-    : 0;
+  const handleExport = () => {
+    toastInfo("Export to CSV functionality coming soon!");
+  };
 
   return (
-    <main className="min-h-screen bg-[#0f0f14] px-4 py-8 md:px-8 md:py-10">
-      <div className="mx-auto max-w-7xl space-y-6">
-        {/* Header */}
-        <section className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl md:p-8">
-          <h1 className="text-3xl font-bold text-white md:text-4xl">
+    <DashboardLayout>
+      <div className="space-y-8 pb-10">
+        <header>
+          <h1 className="text-3xl font-black text-neutral-900 dark:text-white md:text-4xl tracking-tight">
             Transaction History
           </h1>
-          <p className="mt-2 text-sm text-white/70">
-            Search, filter, review, and export your transactions.
+          <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+            View and manage all your past transactions.
           </p>
-        </section>
+        </header>
 
-        {/* Stats */}
-        <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
-            <p className="text-sm text-white/60">Total Transactions</p>
-            <p className="mt-2 text-3xl font-bold text-white">{filtered.length}</p>
-          </div>
-          <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
-            <p className="text-sm text-white/60">Total Spent</p>
-            <p className="mt-2 text-3xl font-bold text-white">
-              ₦{totalSpent.toLocaleString()}
-            </p>
-          </div>
-          <div className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
-            <p className="text-sm text-white/60">Success Rate</p>
-            <p className="mt-2 text-3xl font-bold text-white">{successRate}%</p>
-          </div>
-        </section>
+        {/* Stats Summary */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatCard label="Total Transactions" value={totalTransactions} />
+          <StatCard label="Total Spent" value={formatAmount(totalSpent)} />
+          <StatCard label="Success Rate" value={successRate + "%"} />
+        </div>
 
-        {/* Filters */}
-        <section className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl md:p-6">
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="md:col-span-2">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/55" />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by reference, recipient, or description"
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 py-3 pl-10 pr-4 text-white outline-none placeholder:text-white/40"
-                />
-              </div>
-            </div>
-
+        {/* Filter and Search Bar */}
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+            <Input
+              placeholder="Search by reference, recipient, description..."
+              className="pl-9 pr-4 py-2 rounded-xl border border-neutral-200 dark:border-white/10 dark:bg-neutral-900"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2">
             <Select
-              label="Type"
               value={typeFilter}
               onValueChange={setTypeFilter}
-              options={typeOptions}
+              options={TRANSACTION_TYPES_OPTIONS}
+              placeholder="Type"
+              triggerClassName="w-[180px] rounded-xl border border-neutral-200 dark:border-white/10 dark:bg-neutral-900"
             />
-
             <Select
-              label="Status"
               value={statusFilter}
               onValueChange={setStatusFilter}
-              options={statusOptions}
+              options={TRANSACTION_STATUSES_OPTIONS}
+              placeholder="Status"
+              triggerClassName="w-[180px] rounded-xl border border-neutral-200 dark:border-white/10 dark:bg-neutral-900"
             />
+            <Select
+              value={dateFilter}
+              onValueChange={setDateFilter}
+              options={DATE_FILTERS}
+              placeholder="Date Range"
+              triggerClassName="w-[180px] rounded-xl border border-neutral-200 dark:border-white/10 dark:bg-neutral-900"
+            />
+            
+            <Button variant="secondary" className="rounded-xl" onClick={handleExport}>
+              <Download className="h-4 w-4 mr-2" /> Export CSV
+            </Button>
           </div>
+        </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <span className="text-sm text-white/70">Date Range:</span>
-
-            {[
-              { label: "All", value: "all" },
-              { label: "Last 7 days", value: "7" },
-              { label: "Last 30 days", value: "30" },
-            ].map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                onClick={() => setDateRange(item.value)}
-                className={cn(
-                  "rounded-full px-4 py-2 text-sm transition",
-                  dateRange === item.value
-                    ? "bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))] text-white"
-                    : "border border-white/10 bg-white/5 text-white/75 hover:bg-white/10"
-                )}
-              >
-                {item.label}
-              </button>
-            ))}
-
-            <div className="ml-auto">
-              <Button
-                variant="secondary"
-                leftIcon={<Download className="h-4 w-4" />}
-                onClick={() => alert("CSV export triggered")}
-              >
-                Export as CSV
-              </Button>
+        {/* Transaction List */}
+        <div className="space-y-6">
+          {Object.keys(groupedTransactions).length === 0 ? (
+            <div className="p-12 text-center text-neutral-500 dark:text-neutral-400">
+              No transactions found matching your criteria.
             </div>
-          </div>
-        </section>
-
-        {/* Transactions */}
-        <section className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl md:p-6">
-          {Object.keys(grouped).length === 0 ? (
-            <p className="text-white/70">No transactions match the current filters.</p>
           ) : (
-            <div className="space-y-8">
-              {Object.entries(grouped).map(([group, items]) => (
-                <div key={group}>
-                  <h2 className="mb-4 text-lg font-semibold text-white">{group}</h2>
-
-                  <div className="space-y-3">
-                    {items.map((tx) => {
-                      const expanded = expandedId === tx.id;
-
-                      return (
-                        <div
-                          key={tx.id}
-                          className="rounded-2xl border border-white/10 bg-black/20 p-4"
-                        >
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setExpandedId(expanded ? null : tx.id)
-                            }
-                            className="flex w-full items-center justify-between gap-4 text-left"
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className="rounded-xl bg-white/10 p-3 text-white">
-                                {getTypeIcon(tx.type)}
-                              </div>
-
-                              <div>
-                                <p className="font-medium text-white">
-                                  {tx.description}
-                                </p>
-                                <p className="text-sm text-white/60">
-                                  {tx.recipient ?? tx.reference}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <p className="font-semibold text-white">
-                                  ₦{tx.amount.toLocaleString()}
-                                </p>
-                                <p className="text-xs text-white/55">
-                                  {format(new Date(tx.createdAt), "p")}
-                                </p>
-                              </div>
-
-                              {getStatusBadge(tx.status)}
-
-                              {expanded ? (
-                                <ChevronUp className="h-4 w-4 text-white/60" />
-                              ) : (
-                                <ChevronDown className="h-4 w-4 text-white/60" />
-                              )}
-                            </div>
-                          </button>
-
-                          {expanded && (
-                            <div className="mt-4 grid gap-3 border-t border-white/10 pt-4 text-sm text-white/75 md:grid-cols-2">
-                              <p>
-                                <span className="text-white/50">Reference:</span>{" "}
-                                {tx.reference}
-                              </p>
-                              <p>
-                                <span className="text-white/50">Type:</span>{" "}
-                                {tx.type}
-                              </p>
-                              <p>
-                                <span className="text-white/50">Recipient:</span>{" "}
-                                {tx.recipient ?? "N/A"}
-                              </p>
-                              <p>
-                                <span className="text-white/50">Date:</span>{" "}
-                                {format(new Date(tx.createdAt), "PPP p")}
-                              </p>
-                              <p className="md:col-span-2">
-                                <span className="text-white/50">Description:</span>{" "}
-                                {tx.description}
-                              </p>
-                            </div>
-                          )}
+            Object.entries(groupedTransactions).map(([group, transactions]) => (
+              <div key={group}>
+                <h2 className="text-lg font-black text-neutral-900 dark:text-white mb-4">{group}</h2>
+                <div className="space-y-3">
+                  {transactions.map((tx) => (
+                    <div key={tx.id} className="relative group overflow-hidden rounded-3xl">
+                      {/* Swipe Actions: Left (Reveals Repeat) */}
+                      <div className="absolute inset-0 flex items-center justify-start px-6 bg-emerald-500 text-white">
+                        <div className="flex flex-col items-center gap-1">
+                          <Repeat size={20} />
+                          <span className="text-[10px] font-bold uppercase">Repeat</span>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+                      </div>
+                      
+                      {/* Swipe Actions: Right (Reveals Info/Report) */}
+                      <div className="absolute inset-0 flex items-center justify-end px-4 bg-neutral-100 dark:bg-neutral-800 gap-4">
+                        <button className="flex flex-col items-center gap-1 text-neutral-500">
+                          <Flag size={20} />
+                          <span className="text-[10px] font-bold uppercase">Report</span>
+                        </button>
+                        <button onClick={() => router.push(`/transactions/${tx.id}`)} className="flex flex-col items-center gap-1 text-primary">
+                          <Info size={20} />
+                          <span className="text-[10px] font-bold uppercase">Details</span>
+                        </button>
+                      </div>
 
-          {visibleCount < filtered.length && (
-            <div className="mt-6 flex justify-center">
-              <Button onClick={() => setVisibleCount((v) => v + 20)}>
-                Load More
-              </Button>
-            </div>
+                      <motion.div
+                        drag="x"
+                        dragConstraints={{ left: -140, right: 80 }}
+                        dragElastic={0.1}
+                        dragDirectionLock
+                        onDragEnd={(_, info) => {
+                          if (info.offset.x > 50) toastInfo("Repeating transaction...");
+                        }}
+                        className="relative z-10"
+                      >
+                        <Link href={`/transactions/${tx.id}`} className="flex items-center gap-4 p-4 md:p-6 bg-white dark:bg-neutral-900 border-neutral-200 dark:border-white/5 transition-colors active:bg-neutral-50 dark:active:bg-white/5">
+                          <div className="h-10 w-10 shrink-0 rounded-xl bg-neutral-50 dark:bg-white/5 flex items-center justify-center">
+                            {getServiceIcon(tx.type)}
+                          </div>
+                          <div className="flex-1">
+                            <p className="truncate text-sm font-bold text-neutral-900 dark:text-white">
+                              {tx.description}
+                            </p>
+                            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                              {tx.recipient ? `To: ${tx.recipient} • ` : ''}
+                              {format(parseISO(tx.date), "MMM d, yyyy • h:mm a")}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className={cn(
+                              "text-base font-black tracking-tight",
+                              tx.type === "wallet_credit" ? "text-emerald-500" : "text-neutral-900 dark:text-white"
+                            )}>
+                              {tx.type === "wallet_credit" ? "+" : "-"}
+                              {formatAmount(tx.amount + (tx.fee || 0))}
+                            </p>
+                            <StatusIndicator status={tx.status} size="sm" />
+                          </div>
+                        </Link>
+                      </motion.div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))
           )}
-        </section>
+        </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-2 mt-8">
+            <Button
+              variant="secondary"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "primary" : "secondary"}
+                onClick={() => setCurrentPage(page)}
+              >
+                {page}
+              </Button>
+            ))}
+            <Button
+              variant="secondary"
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </div>
-    </main>
+    </DashboardLayout>
   );
 }
+
+const StatCard = ({ label, value }: { label: string; value: string | number }) => {
+  return (
+    <Card className="p-5 rounded-3xl bg-white dark:bg-neutral-900 border-neutral-200 dark:border-white/5">
+      <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">{label}</p>
+      <p className="text-2xl font-black text-neutral-900 dark:text-white mt-1">{value}</p>
+    </Card>
+  );
+};

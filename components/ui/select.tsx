@@ -20,6 +20,7 @@ interface SelectProps {
   options: SelectOption[];
   disabled?: boolean;
   name?: string;
+  triggerClassName?: string; // Added for custom trigger styling
 }
 
 export function Select({
@@ -31,6 +32,7 @@ export function Select({
   placeholder = "Select an option",
   options,
   disabled,
+  triggerClassName, // Destructure new prop
 }: SelectProps) {
   const id = React.useId();
   const showError = !!errorMessage;
@@ -56,7 +58,8 @@ export function Select({
             "focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-primary)]",
             disabled && "opacity-60 pointer-events-none",
             showError &&
-              "border-[var(--color-danger)] focus:border-[var(--color-danger)] focus:ring-[var(--color-danger)]/30"
+              "border-[var(--color-danger)] focus:border-[var(--color-danger)] focus:ring-[var(--color-danger)]/30",
+            triggerClassName // Apply custom class name here
           )}
         >
           <SelectPrimitive.Value placeholder={placeholder} />

@@ -38,9 +38,18 @@ export function Dialog({
     };
   }, [open]);
 
+  // Separate the trigger from the content to avoid double-rendering and event blocking
+  const childrenArray = React.Children.toArray(children);
+  const trigger = childrenArray.find(
+    (child) => React.isValidElement(child) && child.type === DialogTrigger
+  );
+  const content = childrenArray.filter(
+    (child) => !(React.isValidElement(child) && child.type === DialogTrigger)
+  );
+
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange} {...props}>
-      {children}
+      {trigger}
 
       <DialogPrimitive.Portal>
         <AnimatePresence>
@@ -68,6 +77,12 @@ export function Dialog({
                 }}
               >
                 <motion.div
+                  drag="y"
+                  dragConstraints={{ top: 0 }}
+                  dragElastic={0.2}
+                  onDragEnd={(_, info) => {
+                    if (info.offset.y > 150) onOpenChange?.(false);
+                  }}
                   className={cn(
                     "fixed left-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2",
                     sizeMap[size],
@@ -86,8 +101,9 @@ export function Dialog({
                   {/* Close button */}
                   <DialogPrimitive.Close asChild>
                     <button
+                      type="button"
                       aria-label="Close dialog"
-                      className="absolute right-3 top-3 rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white transition"
+                      className="absolute right-3 top-3 z-50 rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white transition pointer-events-auto"
                     >
                       <X className="h-5 w-5" />
                     </button>
@@ -100,7 +116,7 @@ export function Dialog({
                       bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,0.22),transparent_55%),radial-gradient(circle_at_bottom_right,rgba(236,72,153,0.18),transparent_55%)]"
                   />
 
-                  <div className="relative p-6">{children}</div>
+                  <div className="relative p-6">{content}</div>
                 </motion.div>
               </DialogPrimitive.Content>
             </>

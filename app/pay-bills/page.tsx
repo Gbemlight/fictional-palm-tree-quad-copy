@@ -13,6 +13,9 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import DashboardLayout from "@/components/dashboard/layout";
+import { cn } from "@/lib/utils";
 
 const billCategories = [
   {
@@ -24,7 +27,7 @@ const billCategories = [
   },
   {
     name: "Cable TV",
-    href: "/pay-bills/cable-tv",
+    href: "/pay-bills/cable",
     icon: Tv,
     gradient:
       "bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))]",
@@ -83,7 +86,7 @@ const recentBills = [
 export default function PayBillsPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#000000] px-4 py-8 md:px-8 md:py-10">
-      <div className="pointer-events-none absolute -top-40 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-purple-500/30 blur-[140px]" />
+      <div className="pointer-events-none absolute -top-40 left-1/2 h-125 w-125 -translate-x-1/2 rounded-full bg-purple-500/30 blur-[140px]" />
 
       <div className="relative mx-auto max-w-6xl space-y-8">
         {/* Header */}
@@ -139,7 +142,7 @@ export default function PayBillsPage() {
                 >
                   <Link
                     href={category.href}
-                    className="group block rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl shadow-[0_10px_30px_rgba(124,58,237,0.14)] transition hover:shadow-[0_18px_45px_rgba(124,58,237,0.24)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]/50"
+                    className="group block rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl shadow-[0_10px_30px_rgba(124,58,237,0.14)] transition hover:shadow-[0_18px_45px_rgba(124,58,237,0.24)] focus:outline-none focus:ring-2 focus:ring-accent/50"
                   >
                     <div
                       className={`mb-5 flex h-16 w-16 items-center justify-center rounded-2xl text-white shadow-lg ${category.gradient}`}
