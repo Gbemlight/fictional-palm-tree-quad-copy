@@ -39,9 +39,7 @@ const schema = z.object({
     .string()
     .regex(/^\d{11}$/, "Meter number must be exactly 11 digits"),
   meterType: z.enum(["postpaid", "prepaid"], "Select meter type"),
-  phone: z
-    .string()
-    .regex(/^(070|080|081|090|091)\d{8}$/, "Enter a valid Nigerian number"),
+  phone: z.string().regex(/^(070|080|081|090|091)\d{8}$/, "Enter a valid Nigerian number"),
   provider: z.string().min(1, "Select an electricity provider"),
 });
 

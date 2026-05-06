@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CheckCircle2, Download, Share2, LayoutDashboard, RefreshCcw, Eye, ChevronLeft } from "lucide-react";
 import { motion } from "framer-motion";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-export default function BuyDataSuccessPage() {
+function SuccessContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -151,6 +151,14 @@ export default function BuyDataSuccessPage() {
         Go to Dashboard
       </Link>
     </main>
+  );
+}
+
+export default function BuyDataSuccessPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-neutral-50 dark:bg-neutral-950" />}>
+      <SuccessContent />
+    </Suspense>
   );
 }
 

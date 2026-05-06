@@ -26,7 +26,7 @@ import { mockTransactions, Transaction, type TransactionStatus } from "@/lib/dum
 import { cn } from "@/lib/utils";
 import { toastSuccess, toastInfo } from "@/components/ui/toast";
 
-export default function TransactionDetailPage() {
+function TransactionDetailContent() {
   const params = useParams();
   const router = useRouter();
   const id = params.ref as string;
@@ -37,11 +37,6 @@ export default function TransactionDetailPage() {
   }, []);
 
   const tx = React.useMemo(() => mockTransactions.find((t) => t.id === id), [id]);
-
-  // Prevent hydration mismatch by not rendering dynamic content until mounted
-  if (!isMounted) {
-    return <DashboardLayout><div className="min-h-screen" /></DashboardLayout>;
-  }
 
   if (!tx) {
     return (
@@ -240,6 +235,14 @@ export default function TransactionDetailPage() {
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function TransactionDetailPage() {
+  return (
+    <React.Suspense fallback={<DashboardLayout><div className="min-h-screen animate-pulse bg-neutral-50 dark:bg-neutral-950" /></DashboardLayout>}>
+      <TransactionDetailContent />
+    </React.Suspense>
   );
 }
 
