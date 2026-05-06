@@ -38,9 +38,7 @@ const schema = z.object({
   meterNumber: z
     .string()
     .regex(/^\d{11}$/, "Meter number must be exactly 11 digits"),
-  meterType: z.enum(["postpaid", "prepaid"], {
-    required_error: "Select meter type",
-  }),
+  meterType: z.enum(["postpaid", "prepaid"], "Select meter type"),
   phone: z
     .string()
     .regex(/^(070|080|081|090|091)\d{8}$/, "Enter a valid Nigerian number"),

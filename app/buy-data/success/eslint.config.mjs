@@ -13,4 +13,4 @@ const compat = new FlatCompat({
 });
 
 // Use the FlatCompat utility to extend from existing configs
-export default [...compat.extends("next/core-web-vitals", "next/typescript")];
+export default [...compat.extends("eslint-config-next/core-web-vitals.js", "eslint-config-next/typescript.js")];
