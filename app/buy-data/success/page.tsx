@@ -26,7 +26,8 @@ export default function BuyDataSuccessPage() {
 
   useEffect(() => {
     // Use window for confetti, always center of viewport
-    import("canvas-confetti").then(mod => {
+    // @ts-ignore
+    import("canvas-confetti").then((mod) => {
       const confetti = mod.default || mod;
       if (typeof window !== "undefined" && typeof confetti === "function") {
         confetti({
