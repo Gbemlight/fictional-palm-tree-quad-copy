@@ -10,8 +10,7 @@ import {
   Download,
   History,
   Plus,
-  Send,
-  Wallet as WalletIcon,
+  Send
 } from "lucide-react";
 
 import { AddMoneyModal } from "@/components/wallet/add-money-modal";
@@ -20,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import DashboardLayout from "@/components/dashboard/layout";
 import { Progress } from "@/components/ui/progress";
 import { toastSuccess } from "@/components/ui/toast";
-import { mockUser, mockTransactions } from "@/lib/dummy-data";
+import { mockTransactions, type Transaction } from "@/lib/dummy-data";
 import { cn } from "@/lib/utils";
 
 const DATE_RANGES = [
@@ -53,8 +52,7 @@ function formatAmount(amount: number) {
 }
 
 export default function WalletPage() {
-  const [balance, setBalance] = React.useState(0);
-  const [customRange, setCustomRange] = React.useState({ from: "", to: "" });
+  const [customRange] = React.useState({ from: "", to: "" });
   const [dateRange, setDateRange] = React.useState<number | string>(7);
   const [displayedBalance, setDisplayedBalance] = React.useState(0);
   const [filter, setFilter] = React.useState("All");
@@ -62,7 +60,6 @@ export default function WalletPage() {
   const [transactions] = React.useState(mockTransactions);
 
   React.useEffect(() => {
-    setBalance(dummyWallet.balance);
     const start = 0;
     const end = dummyWallet.balance;
     if (start === end) {
@@ -83,9 +80,9 @@ export default function WalletPage() {
     return () => clearInterval(timer);
   }, []);
 
-  const filteredTxs = transactions.filter((tx: any) => {
-    if (filter === "Credit" && tx.type !== "credit") return false;
-    if (filter === "Debit" && tx.type !== "debit") return false;
+  const filteredTxs = transactions.filter((tx: Transaction) => {
+    if (filter === "Credit" && tx.type !== "wallet_credit") return false;
+    if (filter === "Debit" && tx.type !== "wallet_debit") return false;
     if (filter === "Pending" && tx.status !== "pending") return false;
 
     if (dateRange !== "custom") {
@@ -260,7 +257,7 @@ export default function WalletPage() {
                   </p>
                 </div>
               ) : (
-                filteredTxs.map((tx: any) => (
+                filteredTxs.map((tx: Transaction) => (
                   <motion.div
                     animate={{ opacity: 1 }}
                     className="flex items-center gap-4 p-6 transition-colors hover:bg-neutral-50 dark:hover:bg-white/5"
@@ -270,12 +267,12 @@ export default function WalletPage() {
                     <div
                       className={cn(
                         "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
-                        tx.type === "credit"
+                        tx.type === "wallet_credit"
                           ? "bg-emerald-500/10 text-emerald-500"
                           : "bg-rose-500/10 text-rose-500"
                       )}
                     >
-                      {tx.type === "credit" ? (
+                      {tx.type === "wallet_credit" ? (
                         <ArrowUpRight className="h-6 w-6" />
                       ) : (
                         <ArrowDownLeft className="h-6 w-6" />
@@ -296,10 +293,10 @@ export default function WalletPage() {
                       <p
                         className={cn(
                           "text-lg font-black tracking-tight",
-                          tx.type === "credit" ? "text-emerald-500" : "text-rose-500"
+                          tx.type === "wallet_credit" ? "text-emerald-500" : "text-rose-500"
                         )}
                       >
-                        {tx.type === "credit" ? "+" : "-"}
+                        {tx.type === "wallet_credit" ? "+" : "-"}
                         {formatAmount(tx.amount)}
                       </p>
                       <Badge
@@ -322,7 +319,7 @@ export default function WalletPage() {
       <AddMoneyModal
         open={showAddMoney}
         onOpenChange={setShowAddMoney}
-        onSuccess={(amt) => setBalance((b) => b + amt)}
+        onSuccess={(amt) => setDisplayedBalance((b) => b + amt)}
       />
     </DashboardLayout>
   );

@@ -10,7 +10,7 @@ import { ContactPicker } from "@/components/payment/contact-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { toastSuccess } from "@/components/ui/toast";
 import DashboardLayout from "@/components/dashboard/layout";
 import { cn } from "@/lib/utils";

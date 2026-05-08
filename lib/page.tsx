@@ -15,9 +15,8 @@ import {
   ArrowRight,
   ExternalLink
 } from "lucide-react";
-import { format, isValid, subMinutes, parseISO } from "date-fns";
+import { format, subMinutes, parseISO } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
-import { motion } from "framer-motion";
 
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -25,7 +24,7 @@ import { StatusIndicator } from "../components/dashboard/status-indicator";
 import DashboardLayout from "../components/dashboard/layout";
 import { mockTransactions, Transaction, type TransactionStatus } from "./dummy-data";
 import { cn } from "./utils";
-import { toastSuccess, toastInfo } from "../components/ui/toast";
+import { toastSuccess } from "../components/ui/toast";
 
 export default function TransactionDetailPage() {
   const params = useParams();
@@ -52,7 +51,7 @@ export default function TransactionDetailPage() {
             <AlertTriangle className="h-10 w-10 text-neutral-400" />
           </div>
           <h1 className="text-2xl font-black text-neutral-900 dark:text-white mb-2">Transaction Not Found</h1>
-          <p className="text-neutral-500 mb-8">The transaction you're looking for doesn't exist or has been archived.</p>
+          <p className="text-neutral-500 mb-8">The transaction you&apos;re looking for doesn&apos;t exist or has been archived.</p>
           <Button onClick={() => router.push("/transactions")}>Back to Transactions</Button>
         </div>
       </DashboardLayout>
@@ -200,7 +199,6 @@ export default function TransactionDetailPage() {
                   title={tx.status === 'success' ? 'Transaction Completed' : tx.status === 'failed' ? 'Transaction Failed' : 'Awaiting Provider'} 
                   time={tx.status === 'pending' ? 'Processing...' : format(txDate, "h:mm a")} 
                   status={tx.status === 'success' ? 'completed' : tx.status === 'failed' ? 'failed' : 'pending'} 
-                  isLast
                 />
               </div>
             </Card>
@@ -259,11 +257,10 @@ const DetailItem = ({ label, value, mono }: { label: string; value: string; mono
   );
 }
 
-const TimelineStep = ({ title, time, status, isLast }: {
+const TimelineStep = ({ title, time, status }: {
   title: string; 
   time: string; 
   status: 'completed' | 'active' | 'pending' | 'failed';
-  isLast?: boolean;
 }) => {
   return (
     <div className="flex gap-4 relative">

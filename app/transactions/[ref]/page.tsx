@@ -12,29 +12,23 @@ import {
   CheckCircle2, 
   Clock, 
   XCircle,
-  ArrowRight,
-  ExternalLink
+  ArrowRight
 } from "lucide-react";
-import { format, isValid, subMinutes, parseISO } from "date-fns";
+import { format, subMinutes, parseISO } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { StatusIndicator } from "@/components/dashboard/status-indicator"; 
 import DashboardLayout from "@/components/dashboard/layout";
-import { mockTransactions, Transaction, type TransactionStatus } from "@/lib/dummy-data";
+import { mockTransactions, type TransactionStatus } from "@/lib/dummy-data";
 import { cn } from "@/lib/utils";
-import { toastSuccess, toastInfo } from "@/components/ui/toast";
+import { toastSuccess } from "@/components/ui/toast";
 
 function TransactionDetailContent() {
   const params = useParams();
   const router = useRouter();
   const id = params.ref as string;
-  const [isMounted, setIsMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const tx = React.useMemo(() => mockTransactions.find((t) => t.id === id), [id]);
 
@@ -46,7 +40,7 @@ function TransactionDetailContent() {
             <AlertTriangle className="h-10 w-10 text-neutral-400" />
           </div>
           <h1 className="text-2xl font-black text-neutral-900 dark:text-white mb-2">Transaction Not Found</h1>
-          <p className="text-neutral-500 mb-8">The transaction you're looking for doesn't exist or has been archived.</p>
+          <p className="text-neutral-500 mb-8">The transaction you&apos;re looking for doesn&apos;t exist or has been archived.</p>
           <Button onClick={() => router.push("/transactions")}>Back to Transactions</Button>
         </div>
       </DashboardLayout>

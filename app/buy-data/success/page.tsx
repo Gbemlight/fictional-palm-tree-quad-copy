@@ -2,10 +2,10 @@
 
 import React, { useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { CheckCircle2, Download, Share2, LayoutDashboard, RefreshCcw, Eye, ChevronLeft } from "lucide-react";
+import { CheckCircle2, Download, Share2, LayoutDashboard, RefreshCcw, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { mockTransactions, dataPlans, mockUser } from "../../../lib/dummy-data";
+import { dataPlans } from "../../../lib/dummy-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -20,13 +20,11 @@ function SuccessContent() {
   const planName = searchParams.get("plan") ? (dataPlans.find(p => p.id === searchParams.get("plan"))?.name || "2GB - 30 Days") : "2GB - 30 Days";
   const phone = searchParams.get("phone") || "08012345678";
   const amount = searchParams.get("amount") || "1000";
-  const validity = searchParams.get("validity") || "30 Days";
   const date = searchParams.get("date") || "2026-02-20";
-  const status = searchParams.get("status") || "success";
 
   useEffect(() => {
     // Use window for confetti, always center of viewport
-    // @ts-ignore
+    // Use window for confetti, always center of viewport
     import("canvas-confetti").then((mod) => {
       const confetti = mod.default || mod;
       if (typeof window !== "undefined" && typeof confetti === "function") {

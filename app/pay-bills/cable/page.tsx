@@ -4,14 +4,10 @@ import * as React from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Tv, CheckCircle2, Loader2, Zap, Percent, ShieldCheck } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Tv, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { toastSuccess } from "@/components/ui/toast";
-import DashboardLayout from "@/components/dashboard/layout";
 import {
   Dialog,
   DialogHeader,
@@ -80,20 +76,6 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-function SummaryRow({ label, value, highlight = false }: { label: string; value: string; highlight?: boolean }) {
-  return (
-    <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
-      <span className="text-[10px] font-black uppercase tracking-widest text-white/30">{label}</span>
-      <span className={cn(
-        "font-bold text-sm text-right max-w-[60%] truncate",
-        highlight ? "text-primary" : "text-white"
-      )}>
-        {value}
-      </span>
-    </div>
-  );
-}
-
 /* ---------------- Discounts ---------------- */
 
 function getDiscount(duration: number) {
@@ -110,7 +92,7 @@ export default function CablePage() {
     setValue,
     trigger,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { isValid },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: "onChange",
@@ -124,7 +106,6 @@ export default function CablePage() {
   });
 
   const provider = watch("provider");
-  const cardNumber = watch("cardNumber");
   const packageName = watch("package");
   const duration = watch("duration");
 

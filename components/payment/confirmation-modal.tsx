@@ -3,7 +3,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import * as React from "react";
-import { CheckCircle2, Wallet, CreditCard, Landmark, Smartphone, X, Zap } from "lucide-react";
+import { CheckCircle2, Wallet, CreditCard, Landmark, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { toastError } from "@/components/ui/toast";

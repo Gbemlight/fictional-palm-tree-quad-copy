@@ -1,20 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Search,
   Download,
-  Filter,
   ArrowUpRight,
   ArrowDownLeft,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  Ban,
   Repeat,
   Info,
   Flag
@@ -25,14 +19,12 @@ import DashboardLayout from "@/components/dashboard/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
 import type { SelectOption } from "@/components/ui/select";
 import { mockTransactions } from "@/lib/dummy-data";
 import type { Transaction, TransactionType } from "@/lib/dummy-data";
 import { cn } from "@/lib/utils";
 import { StatusIndicator } from "./status-indicator";
-import type { TransactionStatus } from "./status-indicator";
 import { toastInfo } from "@/components/ui/toast";
 
 const TRANSACTION_TYPES_OPTIONS: SelectOption[] = [

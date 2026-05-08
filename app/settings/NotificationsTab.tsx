@@ -30,12 +30,6 @@ export default function NotificationsTab() {
   const quietEnd = values.quietEnd as string | undefined;
   const isQuietInvalid = quietStart && quietEnd && quietStart >= quietEnd;
 
-  const formatTime = (value?: string) => {
-    if (!value) return "--:--";
-    const date = new Date(`1970-01-01T${value}`);
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
-
   // Enable / Disable all
   const setAll = (value: boolean) => {
     categories.forEach((cat) => {

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Bell, User, LogOut, Settings, Search, ChevronRight, ChevronLeft, Menu } from "lucide-react";
+import { Bell, User, LogOut, Settings, Search, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 // Dummy data for notifications
@@ -163,7 +164,7 @@ export function DashboardHeader() {
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
               <button className="ml-2 p-0.5 rounded-full border-2 border-transparent hover:border-primary/30 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-95">
-                <img src={user.avatar} alt="User avatar" className="w-8 h-8 rounded-full shadow-sm" />
+                <Image src={user.avatar} alt="User avatar" width={32} height={32} className="w-8 h-8 rounded-full shadow-sm" />
               </button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>

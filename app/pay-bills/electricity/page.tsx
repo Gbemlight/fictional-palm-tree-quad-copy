@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { toastSuccess } from "@/components/ui/toast";
 import DashboardLayout from "@/components/dashboard/layout";
 import {
@@ -144,7 +144,7 @@ export default function ElectricityBillPage() {
 
   const canProceed = isValid && meterVerified;
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = () => {
     if (!meterVerified) return;
     setConfirmOpen(true);
   };

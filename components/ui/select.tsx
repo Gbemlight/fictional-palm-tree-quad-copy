@@ -34,7 +34,6 @@ export function Select({
   disabled,
   triggerClassName, // Destructure new prop
 }: SelectProps) {
-  const id = React.useId();
   const showError = !!errorMessage;
 
   return (

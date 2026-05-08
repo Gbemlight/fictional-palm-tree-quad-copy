@@ -40,7 +40,6 @@ export function PhoneInput({
   state = "default",
   disabled,
   countryCode = "+234",
-  onCountryCodeChange,
   value = "",
   onChange,
   onBlur,

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
+import Image from "next/image";
 
 type FormData = {
   fullName: string;
@@ -34,8 +35,6 @@ export default function ProfileForm() {
 
   const [avatar, setAvatar] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  // Store the selected file to prevent premature URL revocation
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAvatarDirty, setIsAvatarDirty] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPhone, setShowPhone] = useState(true);
@@ -43,11 +42,10 @@ export default function ProfileForm() {
   // Avatar preview modal
   const handleAvatarChange = (file: File) => {
     const url = URL.createObjectURL(file);
-    setSelectedFile(file);
     setPreview(url);
   };
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async () => {
     setLoading(true);
 
     await new Promise((res) => setTimeout(res, 1500));
@@ -58,7 +56,6 @@ export default function ProfileForm() {
         reset(defaultValues);
         setAvatar(null);
         setIsAvatarDirty(false);
-        setSelectedFile(null);
       },
     });
   };
@@ -103,7 +100,7 @@ export default function ProfileForm() {
           <label className="relative cursor-pointer group">
             <div className="h-24 w-24 rounded-full overflow-hidden bg-[linear-gradient(135deg,#7c3aed,#ec4899)] flex items-center justify-center text-white text-2xl font-bold shadow-[0_10px_25px_-5px_rgba(124,58,237,0.5),0_8px_10px_-6px_rgba(236,72,153,0.5)] border-4 border-neutral-200 dark:border-neutral-800 transition-all group-hover:border-purple-500/30">
               {avatar ? (
-                <img src={avatar} className="h-full w-full object-cover" alt="Profile" />
+                <Image src={avatar} width={96} height={96} className="h-full w-full object-cover" alt="Profile" />
               ) : (
                 initials
               )}
@@ -281,8 +278,10 @@ export default function ProfileForm() {
             <h3 className="text-lg font-bold mb-6 text-neutral-900 dark:text-white">Preview Photo</h3>
             
             <div className="relative w-40 h-40 mx-auto mb-8">
-              <img
+              <Image
                 src={preview}
+                width={160}
+                height={160}
                 className="w-full h-full object-cover rounded-full ring-4 ring-purple-500/30 shadow-2xl"
                 alt="Preview"
               />

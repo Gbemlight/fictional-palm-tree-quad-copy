@@ -13,9 +13,6 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import DashboardLayout from "@/components/dashboard/layout";
-import { cn } from "@/lib/utils";
 
 const billCategories = [
   {

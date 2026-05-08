@@ -27,7 +27,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         try {
           const parsed = JSON.parse(saved);
           if (parsed?.theme) theme = parsed.theme;
-        } catch (e) {}
+        } catch {}
       }
       applyTheme(theme);
     };
@@ -44,7 +44,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       try {
         const parsed = JSON.parse(saved || "{}");
         if (parsed.theme === "auto") applyTheme("auto");
-      } catch (e) {}
+      } catch {}
     };
 
     mediaQuery.addEventListener("change", handleSystemChange);

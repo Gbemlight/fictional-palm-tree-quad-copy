@@ -11,7 +11,6 @@ import { usePathname } from "next/navigation";
 import { VibrantSpinner } from "../ui/vibrant-loader";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [refreshing, setRefreshing] = React.useState(false);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const y = useMotionValue(0);
   const pullThreshold = 80;
@@ -23,10 +22,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const handleDragEnd = () => {
     if (y.get() >= pullThreshold) {
-      setRefreshing(true);
       // Simulate a data fetch
       setTimeout(() => {
-        setRefreshing(false);
         window.location.reload(); 
       }, 1500);
     }

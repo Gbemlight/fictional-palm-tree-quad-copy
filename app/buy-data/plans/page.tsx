@@ -4,11 +4,18 @@ import { useState, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
-import { ChevronRight, ArrowRight, Check, Zap, Filter, ArrowUpDown } from "lucide-react";
+import { ChevronRight, ArrowRight, Check, Zap, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { dataPlans } from "../../../lib/dummy-data";
+
+type DataPlan = {
+  id: string;
+  provider: string;
+  name: string;
+  price: number;
+};
 
 const FILTERS = ["All", "Daily", "Weekly", "Monthly"];
 const SORTS = [
@@ -16,7 +23,7 @@ const SORTS = [
   { id: "data", label: "Data (High-Low)" },
 ];
 
-function getValidity(plan: any) {
+function getValidity(plan: DataPlan) {
   // Extract days from plan name
   const match = plan.name.match(/(\d+)\s*-\s*(\d+)\s*Days|([0-9]+)\s*Days/);
   let days = 0;

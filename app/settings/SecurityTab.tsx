@@ -2,7 +2,7 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Smartphone, LogOut, QrCode, Copy, Check, X } from "lucide-react";
+import { Eye, EyeOff, LogOut, QrCode, Copy, Check, X } from "lucide-react";
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -316,7 +316,6 @@ function PinInputSection({ onClose, onSave }: { onClose: () => void; onSave: () 
 
 function PinInputBoxes({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [showDigits, setShowDigits] = useState(false);
   const digits = value.split("").slice(0, 4);
   const placeholders = Array(4).fill("");
 

@@ -14,15 +14,33 @@ import {
   Send,
   X,
   Bot,
-  User,
-  ArrowRight
+  User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import DashboardLayout from "@/components/dashboard/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+
+interface SupportCardProps {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  action: string;
+  onClick?: () => void;
+  highlight?: boolean;
+}
+
+interface FAQItemProps {
+  faq: {
+    id: string;
+    category: string;
+    question: string;
+    answer: string;
+  };
+  isExpanded: boolean;
+  onToggle: () => void;
+}
 
 const CATEGORIES = [
   { id: "all", label: "All" },
@@ -173,12 +191,12 @@ export default function HelpCenterPage() {
   );
 }
 
-function SupportCard({ icon, title, desc, action, onClick, highlight }: any) {
+function SupportCard({ icon, title, desc, action, onClick, highlight }: SupportCardProps) {
   return (
     <Card 
       variant={highlight ? "elevated" : "default"}
       className={cn(
-        "p-6 text-center space-y-4 cursor-pointer group hover:border-primary/50 transition-all rounded-[2rem]",
+        "p-6 text-center space-y-4 cursor-pointer group hover:border-primary/50 transition-all rounded-4xl",
         highlight && "border-primary/20 bg-primary/5"
       )}
       onClick={onClick}
@@ -197,7 +215,7 @@ function SupportCard({ icon, title, desc, action, onClick, highlight }: any) {
   );
 }
 
-function FAQItem({ faq, isExpanded, onToggle }: any) {
+function FAQItem({ faq, isExpanded, onToggle }: FAQItemProps) {
   const [feedback, setFeedback] = React.useState<null | 'yes' | 'no'>(null);
 
   return (
@@ -291,7 +309,7 @@ function ChatWidget({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="fixed bottom-6 right-6 z-[100] w-[380px] h-[550px] max-w-[calc(100vw-2rem)] bg-white dark:bg-neutral-900 shadow-2xl rounded-3xl border border-neutral-200 dark:border-white/10 flex flex-col overflow-hidden"
+      className="fixed bottom-6 right-6 z-100 w-95 h-137.5 max-w-[calc(100vw-2rem)] bg-white dark:bg-neutral-900 shadow-2xl rounded-3xl border border-neutral-200 dark:border-white/10 flex flex-col overflow-hidden"
     >
       {/* Chat Header */}
       <div className="p-4 bg-primary text-white flex items-center justify-between">

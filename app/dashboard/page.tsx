@@ -4,8 +4,7 @@ import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
-import { Card } from '../../components/ui/card';
-import { mockUser, mockTransactions } from '../../lib/dummy-data';
+import { mockUser, mockTransactions, type Transaction } from '../../lib/dummy-data';
 import { PieChart, Pie, Cell } from 'recharts';
 
 const quickActions = [
@@ -60,7 +59,7 @@ export default function DashboardPage() {
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {quickActions.map((action, idx) => (
+        {quickActions.map((action) => (
           <Button
             key={action.label}
             className={cn(
@@ -101,7 +100,7 @@ export default function DashboardPage() {
             <Button variant="ghost" className="text-xs font-bold text-primary hover:bg-primary/5">View History</Button>
           </div>
           <ul className="space-y-4">
-            {mockTransactions.slice(0, 5).map((tx: any) => (
+            {mockTransactions.slice(0, 5).map((tx: Transaction) => (
               <li key={tx.id} className="flex items-center p-3 rounded-2xl hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors group">
                 <div className="h-12 w-12 rounded-xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-2xl mr-4 group-hover:scale-110 transition-transform">
                   {tx.type === 'airtime' ? '📱' : tx.type === 'data' ? '📶' : tx.type === 'electricity' ? '💡' : '📺'}
