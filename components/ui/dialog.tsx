@@ -63,7 +63,7 @@ export function Dialog({
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.18 }}
-                  onMouseDown={(e) => {
+                  onMouseDown={(e: React.MouseEvent<HTMLDivElement>) => {
                     if (!closeOnOverlayClick) e.preventDefault();
                   }}
                 />
@@ -72,7 +72,7 @@ export function Dialog({
               {/* Content wrapper */}
               <DialogPrimitive.Content
                 asChild
-                onInteractOutside={(e) => {
+                onInteractOutside={(e: any) => {
                   if (!closeOnOverlayClick) e.preventDefault();
                 }}
               >
@@ -80,7 +80,7 @@ export function Dialog({
                   drag="y"
                   dragConstraints={{ top: 0 }}
                   dragElastic={0.2}
-                  onDragEnd={(_, info) => {
+                  onDragEnd={(event: any, info: any) => {
                     if (info.offset.y > 150) onOpenChange?.(false);
                   }}
                   className={cn(
