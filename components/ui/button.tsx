@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export type ButtonVariant =
@@ -14,14 +14,14 @@ export type ButtonVariant =
 
 export type ButtonSize = "sm" | "md" | "lg" | "xl";
 
-interface ButtonProps extends HTMLMotionProps<"button"> { // Extend HTMLMotionProps directly
+interface ButtonProps extends Omit<React.ComponentPropsWithoutRef<typeof motion.button>, "className"> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   fullWidth?: boolean;
-  children?: React.ReactNode;
+  className?: string;
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -76,8 +76,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500",
           "active:scale-[0.98]",
           "disabled:opacity-50 disabled:pointer-events-none",
-          variantClasses[variant],
-          sizeClasses[size],
+          variantClasses[variant as ButtonVariant],
+          sizeClasses[size as ButtonSize],
           fullWidth && "w-full",
           className
         )}
