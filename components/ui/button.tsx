@@ -21,6 +21,7 @@ interface ButtonProps extends HTMLMotionProps<"button"> { // Extend HTMLMotionPr
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   fullWidth?: boolean;
+  children?: React.ReactNode;
 }
 
 const variantClasses: Record<ButtonVariant, string> = {

@@ -56,46 +56,54 @@ const variantMap: Record<
   },
 };
 
-export function Badge({
-  className,
-  variant = "neutral",
-  size = "md",
-  dot = false,
-  pulse = variant === "pending", // default pulse on pending
-  icon,
-  children,
-  ...props
-}: BadgeProps) {
-  const styles = variantMap[variant];
+export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
+  (
+    {
+      className,
+      variant = "neutral",
+      size = "md",
+      dot = false,
+      pulse = variant === "pending",
+      icon,
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const styles = variantMap[variant];
 
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full font-medium leading-none whitespace-nowrap",
-        sizeMap[size],
-        styles.text,
-        styles.bg,
-        styles.ring,
-        className
-      )}
-      {...props}
-    >
-      {dot && (
-        <span className="relative flex h-2.5 w-2.5 items-center justify-center">
-          {pulse ? (
-            <motion.span
-              className={cn("absolute inline-flex h-2.5 w-2.5 rounded-full opacity-60", styles.dot)}
-              animate={{ scale: [1, 1.6, 1], opacity: [0.6, 0, 0.6] }}
-              transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
-            />
-          ) : null}
-          <span className={cn("inline-flex h-2 w-2 rounded-full", styles.dot)} />
-        </span>
-      )}
+    return (
+      <span
+        ref={ref}
+        className={cn(
+          "inline-flex items-center rounded-full font-medium leading-none whitespace-nowrap",
+          sizeMap[size],
+          styles.text,
+          styles.bg,
+          styles.ring,
+          className
+        )}
+        {...props}
+      >
+        {dot && (
+          <span className="relative flex h-2.5 w-2.5 items-center justify-center">
+            {pulse ? (
+              <motion.span
+                className={cn("absolute inline-flex h-2.5 w-2.5 rounded-full opacity-60", styles.dot)}
+                animate={{ scale: [1, 1.6, 1], opacity: [0.6, 0, 0.6] }}
+                transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+              />
+            ) : null}
+            <span className={cn("inline-flex h-2 w-2 rounded-full", styles.dot)} />
+          </span>
+        )}
 
-      {icon ? <span className="flex items-center">{icon}</span> : null}
+        {icon ? <span className="flex items-center">{icon}</span> : null}
 
-      <span>{children}</span>
-    </span>
-  );
-}
+        <span>{children}</span>
+      </span>
+    );
+  }
+);
+
+Badge.displayName = "Badge";

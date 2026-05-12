@@ -19,30 +19,45 @@ interface SelectProps {
   placeholder?: string;
   options: SelectOption[];
   disabled?: boolean;
+  id?: string;
   name?: string;
   triggerClassName?: string; // Added for custom trigger styling
 }
 
-export function Select({
-  label,
-  helperText,
-  errorMessage,
-  value,
-  onValueChange,
-  placeholder = "Select an option",
-  options,
-  disabled,
-  triggerClassName, // Destructure new prop
-}: SelectProps) {
-  const showError = !!errorMessage;
+export const Select = React.forwardRef<HTMLButtonElement, SelectProps>(
+  (
+    {
+      label,
+      helperText,
+      errorMessage,
+      value,
+      onValueChange,
+      placeholder = "Select an option",
+      options,
+      disabled,
+      triggerClassName,
+      id,
+    },
+    ref
+  ) => {
+    const generatedId = React.useId();
+    const selectId = id ?? generatedId;
+    const showError = !!errorMessage;
+    const describedByIds = [
+      helperText ? `${selectId}-help` : null,
+      errorMessage ? `${selectId}-error` : null,
+    ].filter(Boolean).join(" ");
 
-  return (
-    <div className="w-full">
-      {label && (
-        <label className="mb-2 block text-sm font-medium text-gray-800">
-          {label}
-        </label>
-      )}
+    return (
+      <div className="w-full">
+        {label && (
+          <label
+            htmlFor={selectId}
+            className="mb-2 block text-sm font-medium text-gray-800"
+          >
+            {label}
+          </label>
+        )}
 
       <SelectPrimitive.Root
         value={value}
@@ -50,14 +65,17 @@ export function Select({
         disabled={disabled}
       >
         <SelectPrimitive.Trigger
+          ref={ref}
+          id={selectId}
           aria-invalid={showError ? "true" : "false"}
+          aria-describedby={describedByIds || undefined}
           className={cn(
             "h-11 w-full rounded-xl border bg-white/70 backdrop-blur px-4 text-sm text-gray-900",
             "flex items-center justify-between outline-none transition-all duration-200",
-            "focus:ring-2 focus:ring-[var(--color-accent)]/40 focus:border-[var(--color-primary)]",
+            "focus:ring-2 focus:ring-accent/40 focus:border-primary",
             disabled && "opacity-60 pointer-events-none",
             showError &&
-              "border-[var(--color-danger)] focus:border-[var(--color-danger)] focus:ring-[var(--color-danger)]/30",
+              "border-danger focus:border-danger focus:ring-danger/30",
             triggerClassName // Apply custom class name here
           )}
         >
@@ -79,14 +97,14 @@ export function Select({
                   value={opt.value}
                   className={cn(
                     "relative flex cursor-pointer select-none items-center rounded-lg px-3 py-2 text-sm outline-none",
-                    "text-gray-900 hover:bg-gray-100 data-[highlighted]:bg-gray-100"
+                    "text-gray-900 hover:bg-gray-100 data-highlighted:bg-gray-100"
                   )}
                 >
                   <SelectPrimitive.ItemText>
                     {opt.label}
                   </SelectPrimitive.ItemText>
                   <SelectPrimitive.ItemIndicator className="absolute right-2">
-                    <Check className="h-4 w-4 text-[var(--color-primary)]" />
+                    <Check className="h-4 w-4 text-primary" />
                   </SelectPrimitive.ItemIndicator>
                 </SelectPrimitive.Item>
               ))}
@@ -95,15 +113,18 @@ export function Select({
         </SelectPrimitive.Portal>
       </SelectPrimitive.Root>
 
-      {helperText && !showError && (
-        <p className="mt-2 text-xs text-gray-500">{helperText}</p>
-      )}
+        {helperText && !showError && (
+          <p id={`${selectId}-help`} className="mt-2 text-xs text-gray-500">{helperText}</p>
+        )}
 
-      {showError && (
-        <p role="alert" aria-live="polite" className="mt-2 text-xs text-[var(--color-danger)]">
-          {errorMessage}
-        </p>
-      )}
-    </div>
-  );
-}
+        {showError && (
+          <p id={`${selectId}-error`} role="alert" aria-live="polite" className="mt-2 text-xs text-danger">
+            {errorMessage}
+          </p>
+        )}
+      </div>
+    );
+  }
+);
+
+Select.displayName = "Select";

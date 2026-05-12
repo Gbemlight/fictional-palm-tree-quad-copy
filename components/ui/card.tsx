@@ -1,4 +1,5 @@
 import * as React from "react";
+import { cn } from "@/lib/utils";
 
 type CardVariant = "default" | "elevated" | "interactive" | "outline";
 type CardPadding = "none" | "sm" | "md" | "lg";
@@ -29,10 +30,6 @@ const variantMap: Record<CardVariant, string> = {
     "bg-transparent border border-white/25",
 };
 
-function cx(...classes: Array<string | undefined | false>) {
-  return classes.filter(Boolean).join(" ");
-}
-
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
   (
     {
@@ -49,7 +46,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     return (
       <section
         ref={ref}
-        className={cx(
+        className={cn(
           "relative overflow-hidden rounded-2xl",
           variantMap[variant],
           paddingMap[padding],
@@ -61,7 +58,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {accent && (
           <span
             aria-hidden="true"
-            className={cx(
+            className={cn(
               "pointer-events-none absolute",
               accentPosition === "left"
                 ? "left-0 top-0 h-full w-1"
@@ -91,7 +88,7 @@ export const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <header
     ref={ref}
-    className={cx("mb-3 space-y-1", className)}
+    className={cn("mb-3 space-y-1", className)}
     {...props}
   />
 ));
@@ -103,7 +100,7 @@ export const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cx("text-lg font-semibold text-white", className)}
+    className={cn("text-lg font-semibold text-white", className)}
     {...props}
   />
 ));
@@ -115,7 +112,7 @@ export const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cx("text-sm text-white/70", className)}
+    className={cn("text-sm text-white/70", className)}
     {...props}
   />
 ));
@@ -125,7 +122,7 @@ export const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cx("space-y-3", className)} {...props} />
+  <div ref={ref} className={cn("space-y-3", className)} {...props} />
 ));
 CardContent.displayName = "CardContent";
 
@@ -135,7 +132,7 @@ export const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <footer
     ref={ref}
-    className={cx("mt-4 flex items-center justify-between", className)}
+    className={cn("mt-4 flex items-center justify-between", className)}
     {...props}
   />
 ));

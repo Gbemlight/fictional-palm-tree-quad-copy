@@ -1,15 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { motion, HTMLMotionProps } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 type SkeletonVariant = "rectangle" | "text" | "avatar" | "card";
 
-export interface SkeletonProps extends HTMLMotionProps<"div"> { // Extend HTMLMotionProps directly
+export interface SkeletonProps extends Omit<React.ComponentPropsWithoutRef<typeof motion.div>, "className" | "style"> {
   variant?: SkeletonVariant;
   width?: string | number;
   height?: string | number;
+  className?: string; // Explicitly add className for destructuring
+  style?: React.CSSProperties; // Explicitly add style for destructuring
 }
 
 function toCssSize(v?: string | number) {
@@ -24,23 +26,18 @@ const variantBase: Record<SkeletonVariant, string> = {
   card: "rounded-2xl",
 };
 
-export function Skeleton({
-  className,
-  variant = "rectangle",
-  width,
-  height,
-  style,
-  ...props
-}: SkeletonProps) {
+export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
+  ({ className, variant = "rectangle", width, height, style, ...props }, ref) => {
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0.5 }}
       animate={{ opacity: [0.5, 0.8, 0.5] }}
       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
       className={cn(
         "relative overflow-hidden",
         "bg-neutral-200 dark:bg-neutral-800",
-        variantBase[variant],
+        variantBase[variant as SkeletonVariant],
         className
       )}
       style={{
@@ -57,7 +54,10 @@ export function Skeleton({
       />
     </motion.div>
   );
-}
+  }
+);
+
+Skeleton.displayName = "Skeleton";
 
 /** Text skeleton lines: matches typography sizing better */
 export function SkeletonText({

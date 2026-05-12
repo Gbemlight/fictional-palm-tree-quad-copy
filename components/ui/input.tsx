@@ -57,13 +57,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className={cn(
             "relative flex items-center rounded-xl border bg-white/70 backdrop-blur",
             "transition-all duration-200",
-            "focus-within:ring-2 focus-within:ring-[var(--color-accent)]/40",
-            "focus-within:border-[var(--color-primary)]",
+            "focus-within:ring-2 focus-within:ring-accent/40",
+            "focus-within:border-primary",
             disabled && "opacity-60 pointer-events-none",
             showError &&
-              "border-[var(--color-danger)] focus-within:border-[var(--color-danger)] focus-within:ring-[var(--color-danger)]/30",
+              "border-danger focus-within:border-danger focus-within:ring-danger/30",
             showSuccess &&
-              "border-[var(--color-success)] focus-within:border-[var(--color-success)] focus-within:ring-[var(--color-success)]/30"
+              "border-success focus-within:border-success focus-within:ring-success/30"
           )}
         >
           {leftIcon && (
@@ -88,9 +88,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {/* Right icon / state icon */}
           <span className="absolute right-3 flex items-center">
             {showError ? (
-              <AlertCircle className="h-5 w-5 text-[var(--color-danger)]" />
+              <AlertCircle className="h-5 w-5 text-danger" />
             ) : showSuccess ? (
-              <CheckCircle2 className="h-5 w-5 text-[var(--color-success)]" />
+              <CheckCircle2 className="h-5 w-5 text-success" />
             ) : (
               rightIcon
             )}
@@ -108,7 +108,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={`${inputId}-error`}
             role="alert"
             aria-live="polite"
-            className="mt-2 text-xs text-[var(--color-danger)]"
+            className="mt-2 text-xs text-danger"
           >
             {errorMessage}
           </p>

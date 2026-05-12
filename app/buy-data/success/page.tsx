@@ -24,7 +24,6 @@ function SuccessContent() {
 
   useEffect(() => {
     // Use window for confetti, always center of viewport
-    // Use window for confetti, always center of viewport
     import("canvas-confetti").then((mod) => {
       const confetti = mod.default || mod;
       if (typeof window !== "undefined" && typeof confetti === "function") {
