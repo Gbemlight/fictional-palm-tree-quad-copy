@@ -48,8 +48,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           "relative overflow-hidden rounded-2xl",
-          variantMap[variant],
-          paddingMap[padding],
+          variantMap[variant as CardVariant],
+          paddingMap[padding as CardPadding],
           className
         )}
         {...props}

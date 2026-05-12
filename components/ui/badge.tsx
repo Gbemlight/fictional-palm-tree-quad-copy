@@ -70,7 +70,7 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     },
     ref
   ) => {
-    const styles = variantMap[variant];
+    const styles = variantMap[variant as BadgeVariant];
 
     return (
       <span
