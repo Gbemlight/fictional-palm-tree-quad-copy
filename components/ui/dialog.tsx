@@ -72,7 +72,7 @@ export function Dialog({
               {/* Content wrapper */}
               <DialogPrimitive.Content
                 asChild
-                onInteractOutside={(e: any) => {
+                onInteractOutside={(e: Event) => {
                   if (!closeOnOverlayClick) e.preventDefault();
                 }}
               >
@@ -80,7 +80,7 @@ export function Dialog({
                   drag="y"
                   dragConstraints={{ top: 0 }}
                   dragElastic={0.2}
-                  onDragEnd={(event: any, info: any) => {
+                  onDragEnd={(_: any, info: any) => {
                     if (info.offset.y > 150) onOpenChange?.(false);
                   }}
                   className={cn(

@@ -11,9 +11,15 @@ import {
   ArrowDownLeft,
   Repeat,
   Info,
-  Flag
+  Flag,
 } from "lucide-react";
-import { format, isToday, isYesterday, differenceInDays, parseISO } from "date-fns";
+import {
+  format,
+  isToday,
+  isYesterday,
+  differenceInDays,
+  parseISO,
+} from "date-fns";
 
 import DashboardLayout from "@/components/dashboard/layout";
 import { Button } from "@/components/ui/button";
@@ -51,13 +57,20 @@ const DATE_FILTERS = [
 
 const getServiceIcon = (type: TransactionType) => {
   switch (type) {
-    case "airtime": return <span className="text-lg">📱</span>;
-    case "data": return <span className="text-lg">📶</span>;
-    case "electricity": return <span className="text-lg">💡</span>;
-    case "tv": return <span className="text-lg">📺</span>;
-    case "wallet_credit": return <ArrowUpRight className="h-5 w-5 text-emerald-500" />;
-    case "wallet_debit": return <ArrowDownLeft className="h-5 w-5 text-rose-500" />;
-    default: return <span className="text-lg">💸</span>;
+    case "airtime":
+      return <span className="text-lg">📱</span>;
+    case "data":
+      return <span className="text-lg">📶</span>;
+    case "electricity":
+      return <span className="text-lg">💡</span>;
+    case "tv":
+      return <span className="text-lg">📺</span>;
+    case "wallet_credit":
+      return <ArrowUpRight className="h-5 w-5 text-emerald-500" />;
+    case "wallet_debit":
+      return <ArrowDownLeft className="h-5 w-5 text-rose-500" />;
+    default:
+      return <span className="text-lg">💸</span>;
   }
 };
 
@@ -95,7 +108,9 @@ export default function TransactionsPage() {
 
     // Status filter
     if (statusFilter !== "All") {
-      filtered = filtered.filter((tx) => tx.status === statusFilter.toLowerCase());
+      filtered = filtered.filter(
+        (tx) => tx.status === statusFilter.toLowerCase(),
+      );
     }
 
     // Date filter
@@ -122,24 +137,36 @@ export default function TransactionsPage() {
           tx.reference.toLowerCase().includes(lowerCaseSearchTerm) ||
           tx.recipient?.toLowerCase().includes(lowerCaseSearchTerm) ||
           tx.description.toLowerCase().includes(lowerCaseSearchTerm) ||
-          tx.provider.toLowerCase().includes(lowerCaseSearchTerm)
+          tx.provider.toLowerCase().includes(lowerCaseSearchTerm),
       );
     }
 
     // Sort by date descending
-    return filtered.sort((a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+    return filtered.sort(
+      (a, b) => parseISO(b.date).getTime() - parseISO(a.date).getTime(),
+    );
   }, [typeFilter, statusFilter, dateFilter, searchTerm]);
 
   const totalTransactions = filteredTransactions.length;
-  const totalSpent = filteredTransactions.reduce((sum, tx) => sum + tx.amount + (tx.fee || 0), 0);
-  const successfulTransactions = filteredTransactions.filter(tx => tx.status === "success").length;
-  const successRate = totalTransactions > 0 ? ((successfulTransactions / totalTransactions) * 100).toFixed(1) : "0.0";
+  const totalSpent = filteredTransactions.reduce(
+    (sum, tx) => sum + tx.amount + (tx.fee || 0),
+    0,
+  );
+  const successfulTransactions = filteredTransactions.filter(
+    (tx) => tx.status === "success",
+  ).length;
+  const successRate =
+    totalTransactions > 0
+      ? ((successfulTransactions / totalTransactions) * 100).toFixed(1)
+      : "0.0";
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
+  const totalPages = Math.ceil(
+    filteredTransactions.length / transactionsPerPage,
+  );
   const paginatedTransactions = filteredTransactions.slice(
     (currentPage - 1) * transactionsPerPage,
-    currentPage * transactionsPerPage
+    currentPage * transactionsPerPage,
   );
 
   const groupedTransactions = React.useMemo(() => {
@@ -220,8 +247,12 @@ export default function TransactionsPage() {
               placeholder="Date Range"
               triggerClassName="w-[180px] rounded-xl border border-neutral-200 dark:border-white/10 dark:bg-neutral-900"
             />
-            
-            <Button variant="secondary" className="rounded-xl" onClick={handleExport}>
+
+            <Button
+              variant="secondary"
+              className="rounded-xl"
+              onClick={handleExport}
+            >
               <Download className="h-4 w-4 mr-2" /> Export CSV
             </Button>
           </div>
@@ -236,27 +267,41 @@ export default function TransactionsPage() {
           ) : (
             Object.entries(groupedTransactions).map(([group, transactions]) => (
               <div key={group}>
-                <h2 className="text-lg font-black text-neutral-900 dark:text-white mb-4">{group}</h2>
+                <h2 className="text-lg font-black text-neutral-900 dark:text-white mb-4">
+                  {group}
+                </h2>
                 <div className="space-y-3">
                   {transactions.map((tx) => (
-                    <div key={tx.id} className="relative group overflow-hidden rounded-3xl">
+                    <div
+                      key={tx.id}
+                      className="relative group overflow-hidden rounded-3xl"
+                    >
                       {/* Swipe Actions: Left (Reveals Repeat) */}
                       <div className="absolute inset-0 flex items-center justify-start px-6 bg-emerald-500 text-white">
                         <div className="flex flex-col items-center gap-1">
                           <Repeat size={20} />
-                          <span className="text-[10px] font-bold uppercase">Repeat</span>
+                          <span className="text-[10px] font-bold uppercase">
+                            Repeat
+                          </span>
                         </div>
                       </div>
-                      
+
                       {/* Swipe Actions: Right (Reveals Info/Report) */}
                       <div className="absolute inset-0 flex items-center justify-end px-4 bg-neutral-100 dark:bg-neutral-800 gap-4">
                         <button className="flex flex-col items-center gap-1 text-neutral-500">
                           <Flag size={20} />
-                          <span className="text-[10px] font-bold uppercase">Report</span>
+                          <span className="text-[10px] font-bold uppercase">
+                            Report
+                          </span>
                         </button>
-                        <button onClick={() => router.push(`/transactions/${tx.id}`)} className="flex flex-col items-center gap-1 text-primary">
+                        <button
+                          onClick={() => router.push(`/transactions/${tx.id}`)}
+                          className="flex flex-col items-center gap-1 text-primary"
+                        >
                           <Info size={20} />
-                          <span className="text-[10px] font-bold uppercase">Details</span>
+                          <span className="text-[10px] font-bold uppercase">
+                            Details
+                          </span>
                         </button>
                       </div>
 
@@ -265,12 +310,16 @@ export default function TransactionsPage() {
                         dragConstraints={{ left: -140, right: 80 }}
                         dragElastic={0.1}
                         dragDirectionLock
-                        onDragEnd={(_, info) => {
-                          if (info.offset.x > 50) toastInfo("Repeating transaction...");
+                        onDragEnd={(_: any, info: any) => {
+                          if (info.offset.x > 50)
+                            toastInfo("Repeating transaction...");
                         }}
                         className="relative z-10"
                       >
-                        <Link href={`/transactions/${tx.id}`} className="flex items-center gap-4 p-4 md:p-6 bg-white dark:bg-neutral-900 border-neutral-200 dark:border-white/5 transition-colors active:bg-neutral-50 dark:active:bg-white/5">
+                        <Link
+                          href={`/transactions/${tx.id}`}
+                          className="flex items-center gap-4 p-4 md:p-6 bg-white dark:bg-neutral-900 border-neutral-200 dark:border-white/5 transition-colors active:bg-neutral-50 dark:active:bg-white/5"
+                        >
                           <div className="h-10 w-10 shrink-0 rounded-xl bg-neutral-50 dark:bg-white/5 flex items-center justify-center">
                             {getServiceIcon(tx.type)}
                           </div>
@@ -279,15 +328,22 @@ export default function TransactionsPage() {
                               {tx.description}
                             </p>
                             <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                              {tx.recipient ? `To: ${tx.recipient} • ` : ''}
-                              {format(parseISO(tx.date), "MMM d, yyyy • h:mm a")}
+                              {tx.recipient ? `To: ${tx.recipient} • ` : ""}
+                              {format(
+                                parseISO(tx.date),
+                                "MMM d, yyyy • h:mm a",
+                              )}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className={cn(
-                              "text-base font-black tracking-tight",
-                              tx.type === "wallet_credit" ? "text-emerald-500" : "text-neutral-900 dark:text-white"
-                            )}>
+                            <p
+                              className={cn(
+                                "text-base font-black tracking-tight",
+                                tx.type === "wallet_credit"
+                                  ? "text-emerald-500"
+                                  : "text-neutral-900 dark:text-white",
+                              )}
+                            >
                               {tx.type === "wallet_credit" ? "+" : "-"}
                               {formatAmount(tx.amount + (tx.fee || 0))}
                             </p>
@@ -324,7 +380,9 @@ export default function TransactionsPage() {
             ))}
             <Button
               variant="secondary"
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
               disabled={currentPage === totalPages}
             >
               Next
@@ -336,11 +394,21 @@ export default function TransactionsPage() {
   );
 }
 
-const StatCard = ({ label, value }: { label: string; value: string | number }) => {
+const StatCard = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) => {
   return (
     <Card className="p-5 rounded-3xl bg-white dark:bg-neutral-900 border-neutral-200 dark:border-white/5">
-      <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">{label}</p>
-      <p className="text-2xl font-black text-neutral-900 dark:text-white mt-1">{value}</p>
+      <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+        {label}
+      </p>
+      <p className="text-2xl font-black text-neutral-900 dark:text-white mt-1">
+        {value}
+      </p>
     </Card>
   );
 };

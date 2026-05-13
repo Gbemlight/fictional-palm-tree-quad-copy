@@ -96,7 +96,7 @@ export function Toaster() {
             <Toast.Root
               key={t.id}
               duration={duration}
-              onOpenChange={(open) => {
+              onOpenChange={(open: boolean) => {
                 if (!open) dismiss(t.id);
               }}
               className={cn(

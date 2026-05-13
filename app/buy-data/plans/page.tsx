@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, Suspense } from "react";
+import React, { useState, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -117,7 +117,7 @@ function BuyDataPlansContent() {
             <select
               className="bg-transparent text-sm font-bold text-neutral-900 dark:text-white pr-8 py-2 outline-none cursor-pointer"
               value={sort}
-              onChange={e => setSort(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSort(e.target.value)}
             >
               {SORTS.map(s => (
                 <option key={s.id} value={s.id} className="dark:bg-neutral-900">{s.label}</option>
@@ -182,7 +182,7 @@ function BuyDataPlansContent() {
                       "rounded-2xl h-12",
                       !isActive && "bg-neutral-100 dark:bg-white/10 border border-neutral-200 dark:border-white/20"
                     )}
-                    onClick={(e) => { e.stopPropagation(); setSelected(plan.id); }}
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); setSelected(plan.id); }}
                   >
                     {isActive ? "Selected" : "Select Plan"}
                     {isActive && <Check className="ml-2 h-4 w-4" />}
