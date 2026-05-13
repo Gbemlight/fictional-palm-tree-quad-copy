@@ -114,7 +114,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           aria-invalid={showError ? "true" : "false"}
           aria-describedby={describedByIds || undefined}
           value={value}
-          onChange={(e) => onChange?.(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange?.(e.target.value)}
           onBlur={onBlur}
           placeholder={placeholder}
           inputMode="numeric"
