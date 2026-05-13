@@ -44,6 +44,7 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
       state = "default",
       disabled,
       countryCode = "+234",
+      onCountryCodeChange,
       value = "",
       onChange,
       onBlur,
@@ -95,7 +96,11 @@ export const PhoneInput = React.forwardRef<HTMLInputElement, PhoneInputProps>(
           disabled={disabled}
           aria-label="Select country code"
           onClick={() => {
-            // only one option now, but ready for extension
+            // Example: toggle a dropdown
+            // if (onCountryCodeChange) {
+            //   const next = countryOptions[0].code === "+234" ? "+1" : "+234";
+            //   onCountryCodeChange(next);
+            // }
           }}
         >
           <span className="font-medium">{countryOptions[0].label}</span>
