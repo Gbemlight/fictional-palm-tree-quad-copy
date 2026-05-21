@@ -37,7 +37,7 @@ export default function RootLayout({
   return (
      <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head />
-      <body className="antialiased bg-white text-black dark:bg-black dark:text-white transition-colors duration-300 overflow-x-hidden selection:bg-indigo-100 dark:selection:bg-indigo-500/30">
+      <body className="antialiased bg-white text-black dark:bg-black dark:text-white transition-colors duration-300 selection:bg-indigo-100 dark:selection:bg-indigo-500/30">
         <Script
           id="theme-initializer"
           strategy="beforeInteractive"

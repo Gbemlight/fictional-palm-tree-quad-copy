@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <main className="relative bg-white dark:bg-neutral-950 transition-colors duration-300">
+    <main className="relative w-full bg-white dark:bg-neutral-950 transition-colors duration-300">
       {/* Background Decorative Elements */}
-      <div className="fixed inset-0 pointer-events-none -z-10">
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-500/10 blur-[120px]" />
         <div className="absolute bottom-[10%] right-[-5%] w-[50%] h-[50%] rounded-full bg-violet-500/10 blur-[100px]" />
       </div>
 
-      <div className="container relative z-10 mx-auto px-4 min-h-dvh flex flex-col items-center justify-center py-20 text-center">
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-dvh w-full py-20 px-4 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
