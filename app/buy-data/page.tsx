@@ -6,56 +6,57 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import DashboardLayout from "@/components/dashboard/layout";
 import { cn } from "@/lib/utils";
 
 const PROVIDERS = [
   {
     id: "mtn",
     name: "MTN",
+    shortName: "MTN",
     logo: (
-      <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
         <ellipse cx="20" cy="20" rx="20" ry="20" fill="#FFD600" />
         <text x="50%" y="55%" textAnchor="middle" fontWeight="900" fontSize="14" fill="#1A1A1A" dy=".3em">MTN</text>
       </svg>
     ),
-    gradient: "from-[#FFD600] to-[#FFB800]",
-    glow: "group-hover:shadow-[#FFD600]/30",
+    accent: "#FFD600",
   },
   {
     id: "airtel",
-    name: "Airtel",
+    name: "Airtel Africa",
+    shortName: "Airtel",
     logo: (
-      <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
         <ellipse cx="20" cy="20" rx="20" ry="20" fill="#E6002D" />
         <text x="50%" y="55%" textAnchor="middle" fontWeight="900" fontSize="12" fill="#fff" dy=".3em">Airtel</text>
       </svg>
     ),
-    gradient: "from-[#E6002D] to-[#B30024]",
-    glow: "group-hover:shadow-[#E6002D]/30",
+    accent: "#E6002D",
   },
   {
     id: "glo",
-    name: "Glo",
+    name: "Globacom Limited",
+    shortName: "Glo",
     logo: (
-      <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
         <ellipse cx="20" cy="20" rx="20" ry="20" fill="#1DBF39" />
         <text x="50%" y="55%" textAnchor="middle" fontWeight="900" fontSize="14" fill="#fff" dy=".3em">Glo</text>
       </svg>
     ),
-    gradient: "from-[#1DBF39] to-[#158C2A]",
-    glow: "group-hover:shadow-[#1DBF39]/30",
+    accent: "#1DBF39",
   },
   {
     id: "9mobile",
-    name: "9mobile",
+    name: "9mobile Nigeria",
+    shortName: "9mobile",
     logo: (
-      <svg width="48" height="48" viewBox="0 0 40 40" fill="none">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
         <ellipse cx="20" cy="20" rx="20" ry="20" fill="#004631" />
         <text x="50%" y="55%" textAnchor="middle" fontWeight="900" fontSize="10" fill="#fff" dy=".3em">9mobile</text>
       </svg>
     ),
-    gradient: "from-[#004631] to-[#002E1F]",
-    glow: "group-hover:shadow-[#004631]/30",
+    accent: "#004631",
   },
 ];
 
@@ -64,26 +65,28 @@ export default function BuyDataPage() {
   const router = useRouter();
 
   return (
-    <main className="min-h-screen bg-neutral-50 dark:bg-neutral-950 p-6 md:p-12 lg:p-16">
-      <div className="max-w-3xl mx-auto">
-        <Link 
-          href="/dashboard" 
-          className="group mb-8 inline-flex items-center gap-2 text-sm font-medium text-neutral-500 hover:text-primary transition-colors"
-        >
-          <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-          Back to Dashboard
-        </Link>
-
-        <header className="mb-12">
-          <h1 className="text-4xl font-black tracking-tight text-neutral-900 dark:text-white mb-2">
-            Buy Data
-          </h1>
-          <p className="text-neutral-500 dark:text-neutral-400 font-medium">
-            Select your network provider to see available plans
-          </p>
+    <DashboardLayout>
+      <div className="max-w-2xl mx-auto space-y-10 pb-20">
+        <header className="space-y-4">
+          <Link 
+            href="/dashboard" 
+            className="group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-400 hover:text-indigo-600 transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            Dashboard
+          </Link>
+          
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white md:text-4xl">
+              Buy Data
+            </h1>
+            <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+              Choose your network provider to see available data bundles.
+            </p>
+          </div>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-12">
+        <div className="grid grid-cols-2 gap-4 md:gap-6">
           {PROVIDERS.map((provider) => {
             const isActive = selected === provider.id;
             
@@ -95,19 +98,31 @@ export default function BuyDataPage() {
                 whileHover={{ y: -4 }}
                 whileTap={{ scale: 0.98 }}
                 className={cn(
-                  "group relative flex flex-col items-center justify-center min-h-45 rounded-[2.5rem] p-8 transition-all duration-300",
-                  "bg-linear-to-br shadow-xl overflow-hidden",
-                  provider.gradient,
-                  provider.glow,
-                  isActive ? "ring-4 ring-white dark:ring-primary scale-[1.02] z-10" : "opacity-90 hover:opacity-100"
+                  "group relative flex flex-col items-center justify-center min-h-48 rounded-[2.5rem] p-6 transition-all duration-300",
+                  "bg-white dark:bg-neutral-900 border-2 shadow-sm",
+                  isActive 
+                    ? "border-indigo-600 dark:border-indigo-500 shadow-xl shadow-indigo-500/10" 
+                    : "border-neutral-100 dark:border-white/5 hover:border-neutral-200 dark:hover:border-white/10"
                 )}
               >
-                <div className="relative z-10 mb-4 bg-white/20 backdrop-blur-md rounded-2xl p-4 shadow-inner">
+                <div 
+                  className="relative z-10 mb-5 rounded-2xl p-4 shadow-sm border border-neutral-50 dark:border-white/5 bg-neutral-50 dark:bg-white/5 transition-transform group-hover:scale-110 duration-500"
+                  style={{ backgroundColor: isActive ? `${provider.accent}15` : undefined }}
+                >
                   {provider.logo}
                 </div>
-                <span className="relative z-10 font-black text-xl text-white tracking-tight">
-                  {provider.name}
-                </span>
+                
+                <div className="text-center space-y-1">
+                  <span className={cn(
+                    "block font-bold text-lg tracking-tight transition-colors",
+                    isActive ? "text-neutral-900 dark:text-white" : "text-neutral-700 dark:text-neutral-300"
+                  )}>
+                    {provider.shortName}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+                    Network
+                  </span>
+                </div>
 
                 <AnimatePresence>
                   {isActive && (
@@ -115,32 +130,32 @@ export default function BuyDataPage() {
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
-                      className="absolute top-4 right-4 bg-white text-neutral-900 rounded-full p-1.5 shadow-lg"
+                      className="absolute top-4 right-4 bg-indigo-600 text-white rounded-full p-1.5 shadow-lg shadow-indigo-500/30"
                     >
-                      <Check className="h-4 w-4 stroke-3" />
+                      <Check className="h-3 w-3 stroke-4" />
                     </motion.div>
                   )}
                 </AnimatePresence>
-                
-                {/* Subtle shine effect on hover */}
-                <div className="absolute inset-0 bg-linear-to-tr from-white/0 via-white/5 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
               </motion.button>
             );
           })}
         </div>
 
-        <footer className="flex justify-center">
+        <div className="pt-8">
           <Button
             size="xl"
-            className="min-w-60 rounded-2xl"
+            className="w-full h-16 rounded-4xl text-base font-bold shadow-xl shadow-indigo-500/20 bg-linear-to-r from-indigo-600 to-violet-600 border-none text-white hover:opacity-90 transition-opacity"
             disabled={!selected}
             rightIcon={<ArrowRight className="h-5 w-5" />}
             onClick={() => router.push(`/buy-data/plans?provider=${selected}`)}
           >
-            Next: Select Plan
+            Select Plan
           </Button>
-        </footer>
+          <p className="text-center mt-6 text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-400 dark:text-neutral-600">
+            Step 1 of 3: Provider Selection
+          </p>
+        </div>
       </div>
-    </main>
+    </DashboardLayout>
   );
 }

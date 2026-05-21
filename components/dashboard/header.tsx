@@ -4,7 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Bell, User, LogOut, Settings, Search, ChevronRight } from "lucide-react";
+import { 
+  Bell, 
+  User, 
+  LogOut, 
+  Settings, 
+  Search, 
+  ChevronRight, 
+  Calendar 
+} from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -17,9 +25,9 @@ const notifications = [
 ];
 
 const user = {
-  name: "Sadiq Ahmad",
-  email: "sadiq@quickpay.app",
-  avatar: "https://ui-avatars.com/api/?name=Sadiq+Ahmad&background=0D8ABC&color=fff",
+  name: "Adeyanju Oluwadamilare",
+  email: "oluwadamilare@credixa.app",
+  avatar: "https://ui-avatars.com/api/?name=Adeyanju+Oluwadamilare&background=0D8ABC&color=fff",
 };
 
 function getBreadcrumbs(pathname: string) {
@@ -95,7 +103,12 @@ export function DashboardHeader() {
             {isMounted && getBreadcrumbs(pathname || "").map((crumb, idx, array) => (
               <React.Fragment key={crumb.href}>
                 <ChevronRight className="w-4 h-4 mx-1 text-neutral-300 dark:text-neutral-600" />
-                <Link href={crumb.href} className={cn("hover:text-primary transition-colors", idx === array.length - 1 && "font-semibold text-neutral-900 dark:text-white truncate max-w-30 md:max-w-xs overflow-hidden text-ellipsis")}>{crumb.label}</Link>
+                <Link 
+                  href={crumb.href} 
+                  className={cn("hover:text-primary transition-colors", idx === array.length - 1 && "font-semibold text-neutral-900 dark:text-white truncate max-w-30 md:max-w-xs overflow-hidden text-ellipsis")}
+                > 
+                  <span>{crumb.label}</span>
+                </Link>
               </React.Fragment>
             ))}
           </nav>
@@ -155,16 +168,24 @@ export function DashboardHeader() {
                   ))
                 )}
               </div>
-                <Link href="/settings?tab=notifications" className="block text-center text-primary text-xs font-bold py-3 hover:bg-neutral-50 dark:hover:bg-white/5 rounded-xl transition-colors mt-1">View All Notifications</Link>
+                <Link href="/settings?tab=notifications" className="block text-center text-primary text-xs font-bold py-3 hover:bg-neutral-50 dark:hover:bg-white/5 rounded-xl transition-colors mt-1">
+                  <span>View All Notifications</span>
+                </Link>
               </DropdownMenu.Content>
             </DropdownMenu.Portal>
           </DropdownMenu.Root>
 
           {/* User avatar & menu */}
           <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
+            <DropdownMenu.Trigger asChild aria-label="User menu">
               <button className="ml-2 p-0.5 rounded-full border-2 border-transparent hover:border-primary/30 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 active:scale-95">
-                <Image src={user.avatar} alt="User avatar" width={32} height={32} className="w-8 h-8 rounded-full shadow-sm" />
+                <Image 
+                  src={user.avatar} 
+                  alt="User avatar" 
+                  width={32} 
+                  height={32} 
+                  className="w-8 h-8 rounded-full shadow-sm" 
+                />
               </button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Portal>
@@ -174,13 +195,13 @@ export function DashboardHeader() {
                   <div className="text-[10px] font-medium text-neutral-500 truncate uppercase tracking-widest">{user.email}</div>
               </div>
               <DropdownMenu.Item asChild>
-                <Link href="/settings?tab=profile" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 hover:text-primary transition-colors outline-none cursor-pointer">
-                  <User className="w-4 h-4" /> Profile
+                <Link href="/settings?tab=profile" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 hover:text-primary transition-colors cursor-pointer outline-none">
+                  <User className="w-4 h-4" /> <span>Profile</span>
                 </Link>
               </DropdownMenu.Item>
               <DropdownMenu.Item asChild>
-                <Link href="/settings" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 hover:text-primary transition-colors outline-none cursor-pointer">
-                  <Settings className="w-4 h-4" /> Settings
+                <Link href="/settings" className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-white/5 hover:text-primary transition-colors cursor-pointer outline-none">
+                  <Settings className="w-4 h-4" /> <span>Settings</span>
                 </Link>
               </DropdownMenu.Item>
               <DropdownMenu.Separator className="h-px bg-neutral-200 dark:bg-neutral-800 my-1 mx-2" />

@@ -3,254 +3,231 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import * as Dialog from "@radix-ui/react-dialog";
-import { motion } from "framer-motion";
-import {
-  LayoutDashboard,
-  Smartphone,
-  Phone,
-  Receipt,
-  ArrowLeftRight,
-  Wallet,
-  Settings,
-  HelpCircle,
-  Menu,
-  ChevronLeft,
-  ChevronRight,
-  X,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
+import { mockUser } from "@/lib/dummy-data";
+import { 
+  LayoutDashboard, 
+  Signal, 
+  Smartphone, 
+  Zap, 
+  History, 
+  Wallet, 
+  Settings, 
+  ChevronLeft, 
+  Menu, 
+  X, 
+  HelpCircle, // Added HelpCircle icon
+  LogOut
+  ,Gem // Added Gem icon for logo
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-type NavItem = {
-  label: string;
-  href: string;
-  icon: React.ReactNode;
-};
-
-const NAV: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: <LayoutDashboard className="h-5 w-5" /> },
-  { label: "Buy Data", href: "/buy-data", icon: <Smartphone className="h-5 w-5" /> },
-  { label: "Buy Airtime", href: "/buy-airtime", icon: <Phone className="h-5 w-5" /> },
-  { label: "Pay Bills", href: "/pay-bills", icon: <Receipt className="h-5 w-5" /> },
-  { label: "Transactions", href: "/transactions", icon: <ArrowLeftRight className="h-5 w-5" /> },
-  { label: "Wallet", href: "/wallet", icon: <Wallet className="h-5 w-5" /> },
-  { label: "Settings", href: "/settings", icon: <Settings className="h-5 w-5" /> },
-  { label: "Help Center", href: "/help", icon: <HelpCircle className="h-5 w-5" /> },
+const navItems = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Buy Data", href: "/buy-data", icon: Signal },
+  { label: "Buy Airtime", href: "/buy-airtime", icon: Smartphone },
+  { label: "Pay Bills", href: "/pay-bills", icon: Zap },
+  { label: "Transactions", href: "/transactions", icon: History },
+  { label: "Wallet", href: "/wallet", icon: Wallet },
+  { label: "Settings", href: "/settings", icon: Settings },
+  { label: "Help", href: "/help", icon: HelpCircle }, // Added Help item
 ];
 
-const STORAGE_KEY = "quickpay_sidebar_collapsed";
-
-type SidebarUser = {
-  name: string;
-  email: string;
-  avatarUrl?: string;
-};
-
-export function Sidebar({
-  user = { name: "Sadiq Ahmad", email: "sadiq@quickpay.app" },
-}: {
-  user?: SidebarUser;
-}) {
+export function Sidebar() {
   const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [isMobileOpen, setIsMobileOpen] = React.useState(false);
 
-  const [collapsed, setCollapsed] = React.useState(false);
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-
-  // Persist collapsed state
+  // Load and persist sidebar state
   React.useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === "1") setCollapsed(true);
-    } catch (e) {
-      console.warn("Failed to load sidebar state", e);
-    }
+    const saved = localStorage.getItem("sidebar-collapsed");
+    if (saved !== null) setIsCollapsed(saved === "true");
   }, []);
 
-  React.useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, collapsed ? "1" : "0");
-    } catch (e) {
-      console.warn("Failed to save sidebar state", e);
-    }
-  }, [collapsed]);
+  const toggleSidebar = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    localStorage.setItem("sidebar-collapsed", String(newState));
+  };
 
-  // Sidebar Inner Content - Shared between Mobile and Desktop
-  const SidebarInner = ({ onNavigate }: { onNavigate?: () => void }) => (
-    <aside
-      className={cn(
-        "relative h-full transition-all duration-300",
-        "bg-white/95 dark:bg-neutral-900/95 backdrop-blur-2xl border-r border-neutral-200 dark:border-white/10",
-        "text-neutral-900 dark:text-white shadow-xl overflow-hidden",
-        collapsed ? "w-20" : "w-64"
-      )}
-      aria-label="Sidebar"
-    >
-      {/* Gradient border on right edge */}
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute right-0 top-0 h-full w-0.5 bg-linear-to-b from-primary via-secondary to-accent opacity-50 dark:opacity-80"
-      />
-
-      <div className="flex h-full flex-col">
-        {/* Top branding */}
-        <div className={cn("flex items-center justify-between px-4 py-4", collapsed && "px-3")}>
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-linear-to-br from-primary to-secondary shadow-lg shadow-primary/20" />
-            {!collapsed && (
-              <div className="leading-tight">
-                <div className="text-lg font-black tracking-tighter bg-linear-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                  QuickPay
-                </div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-white/40">Hub</div>
-              </div>
-            )}
-          </div>
-
-          {/* Collapse toggle */}
-          <button
-            type="button"
-            className={cn(
-              "hidden md:inline-flex items-center justify-center rounded-xl p-2",
-              "hover:bg-neutral-100 dark:hover:bg-white/10 transition-colors"
-            )}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            onClick={() => setCollapsed((v) => !v)}
-          >
-            {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
-          </button>
+  const NavContent = ({ mobile = false }) => (
+    <div className="flex flex-col h-full bg-white dark:bg-neutral-950">
+      {/* Logo Section */}
+      <div className={cn(
+        "p-6 flex items-center gap-3 transition-all duration-300",
+        isCollapsed && !mobile ? "justify-center" : "justify-start"
+      )}>
+        <div className="w-10 h-10 bg-linear-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+          <Gem className="text-white h-6 w-6" />
         </div>
+        <AnimatePresence>
+          {(!isCollapsed || mobile) && (
+            <motion.span 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              className="text-xl font-black tracking-tighter bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-violet-600"
+            >
+              Credixa
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </div>
 
-        {/* Nav */}
-        <nav className={cn("flex-1 px-3 py-2", collapsed && "px-2")} aria-label="Main navigation">
-          <ul className="space-y-2">
-            {NAV.map((item) => {
-              const active = pathname === item.href || pathname?.startsWith(item.href + "/");
-
-              return (
-                <li key={item.href}>
-                  <motion.div whileHover={{ scale: 1.02, filter: "drop-shadow(0 0 8px rgba(124, 58, 237, 0.4))" }} transition={{ duration: 0.2 }}>
-                    <Link
-                      href={item.href}
-                      onClick={onNavigate}
-                      className={cn(
-                        "group flex items-center gap-3 rounded-xl px-3 py-3 outline-none",
-                        "transition-all duration-300",
-                        "focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-0",
-                        active
-                          ? "bg-linear-to-br from-primary to-secondary text-white shadow-lg shadow-primary/30"
-                          : "text-neutral-500 dark:text-white/60 hover:bg-neutral-100 dark:hover:bg-white/10 hover:text-neutral-900 dark:hover:text-white"
-                      )}
-                      aria-current={active ? "page" : undefined}
-                    >
-                      <span
-                        className={cn(
-                          "transition-colors",
-                          active ? "text-white" : "text-white/70 group-hover:text-white"
-                        )}
-                      >
-                        {item.icon}
-                      </span>
-
-                      {!collapsed && (
-                        <span className={cn("font-medium", active && "font-bold")}>
-                          {item.label}
-                        </span>
-                      )}
-                    </Link>
-                  </motion.div>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        {/* User section */}
-        <div className={cn("mt-auto px-4 py-4", collapsed && "px-3")}>
-          <div className={cn("flex items-center gap-3 rounded-2xl bg-neutral-100 dark:bg-white/5 border border-neutral-200 dark:border-white/10 p-3 shadow-sm")}>
-            <div className="h-10 w-10 overflow-hidden rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20">
-              {/* simple avatar */}
-              {user.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-sm font-bold text-primary dark:text-white/80">
-                  {user.name.split(" ").map((s) => s[0]).slice(0, 2).join("")}
-                </span>
+      {/* Navigation Links */}
+      <nav className="flex-1 px-4 space-y-2 mt-4">
+        {navItems.map((item) => {
+          // Professional active check: matches exact path OR sub-paths (except for home)
+          const isActive = pathname === item.href || 
+            (item.href !== "/dashboard" && pathname?.startsWith(item.href));
+            
+          return (
+            <Link 
+              key={item.href} 
+              href={item.href}
+              onClick={() => mobile && setIsMobileOpen(false)}
+              className={cn(
+                "relative flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 group overflow-hidden",
+                isActive 
+                  ? "bg-linear-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20" 
+                  : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(99,102,241,0.1)]",
+                isCollapsed && !mobile ? "justify-center" : "justify-start"
               )}
-            </div>
-
-            {!collapsed && (
-              <div className="min-w-0">
-                <div className="truncate text-sm font-bold text-neutral-900 dark:text-white">{user.name}</div>
-                <div className="truncate text-[10px] font-medium text-neutral-500 dark:text-white/50">{user.email}</div>
+            >
+              <div className="flex items-center gap-3">
+                <item.icon className={cn(
+                  "h-5 w-5 transition-colors duration-300",
+                  isActive ? "text-white" : "group-hover:text-indigo-500"
+                )} />
+                {(!isCollapsed || mobile) && (
+                  <span className={cn(
+                    "text-sm font-bold tracking-tight",
+                    isActive ? "text-white" : "text-neutral-600 dark:text-neutral-300"
+                  )}>
+                    {item.label}
+                  </span>
+                )}
               </div>
-            )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* User Profile Section */}
+      <div className={cn(
+        "p-4 border-t border-neutral-100 dark:border-white/5",
+        isCollapsed && !mobile ? "flex justify-center" : ""
+      )}>
+        <div className={cn(
+          "flex items-center gap-3 p-2 rounded-2xl hover:bg-neutral-50 dark:hover:bg-white/5 transition-colors cursor-pointer group",
+          isCollapsed && !mobile ? "justify-center" : ""
+        )}>
+          <div className="h-10 w-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 border-2 border-white dark:border-neutral-800 shadow-sm shrink-0 overflow-hidden">
+            <img 
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(mockUser.name)}&background=6366f1&color=fff`} 
+              alt="Avatar"
+              className="h-full w-full object-cover"
+            />
           </div>
+          {(!isCollapsed || mobile) && (
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-neutral-900 dark:text-white truncate">{mockUser.name}</p>
+              <p className="text-[10px] font-medium text-neutral-500 truncate uppercase tracking-widest">Administrator</p>
+            </div>
+          )}
+          {(!isCollapsed || mobile) && <LogOut className="h-4 w-4 text-neutral-400 group-hover:text-rose-500 transition-colors" />}
         </div>
       </div>
-    </aside>
+    </div>
   );
 
   return (
     <>
-      {/* Mobile top-left hamburger */}
+      {/* Desktop Sidebar */}
+      <motion.aside
+        initial={false} // Ensures Framer Motion doesn't animate on initial render
+        animate={{ width: isCollapsed ? 80 : 280 }}
+        className="hidden md:flex flex-col sticky top-0 h-screen z-40 bg-white dark:bg-neutral-950 border-r border-transparent group overflow-hidden"
+      >
+        {/* Right edge gradient border */}
+        <div className="absolute top-0 right-0 h-full w-px bg-linear-to-b from-transparent via-neutral-200 dark:via-white/10 to-transparent" />
+        
+        <NavContent />
+
+        {/* Collapse Toggle */}
+        <button 
+          onClick={toggleSidebar}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="absolute -right-3 top-20 h-6 w-6 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-full flex items-center justify-center shadow-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors z-50"
+        >
+          <motion.div
+            animate={{ rotate: isCollapsed ? 180 : 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ChevronLeft className="h-4 w-4 text-neutral-500" />
+          </motion.div>
+        </button>
+      </motion.aside>
+
+      {/* Mobile Trigger - This would typically be in the Header component, 
+          but we'll include it here or assume layout handles it */}
       <div className="md:hidden fixed top-4 left-4 z-50">
-        <button
-          type="button"
-          onClick={() => setMobileOpen(true)}
-          className="inline-flex items-center justify-center rounded-xl bg-white/90 dark:bg-neutral-900/90 backdrop-blur border border-neutral-200 dark:border-white/15 p-3 text-neutral-900 dark:text-white shadow-xl"
-          aria-label="Open menu"
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="rounded-xl bg-linear-to-r from-indigo-600 to-violet-600 border-none shadow-lg text-white hover:opacity-90 transition-opacity"
+          onClick={() => setIsMobileOpen(true)}
         >
           <Menu className="h-5 w-5" />
-        </button>
-      </div>
-
-      {/* Desktop sidebar */}
-      <div className="hidden md:block h-screen sticky top-0">
-        <SidebarInner />
+        </Button>
       </div>
 
       {/* Mobile Drawer (Radix Dialog) */}
-      <Dialog.Root open={mobileOpen} onOpenChange={setMobileOpen}>
+      <Dialog.Root open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" />
-          <Dialog.Content className="fixed inset-y-0 left-0 z-50 outline-none">
-            <Dialog.Title className="sr-only">Navigation Menu</Dialog.Title>
-            <Dialog.Description className="sr-only">QuickPay Hub navigation links for mobile devices.</Dialog.Description>
-            
+          <Dialog.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" />
+          <Dialog.Content 
+            className="fixed top-0 left-0 bottom-0 w-75 bg-white dark:bg-neutral-950 z-50 shadow-2xl focus:outline-none"
+            asChild
+          >
             <motion.div
-              initial={{ x: -40, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -40, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 260, damping: 24 }}
-              className="h-full w-[86%] max-w-[320px]"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
             >
-              <div className="h-full">
-                <div className="absolute top-4 right-4 z-50">
-                  <Dialog.Close asChild>
-                    <button
-                      className="rounded-xl bg-neutral-100 dark:bg-white/10 backdrop-blur border border-neutral-200 dark:border-white/15 p-3 text-neutral-900 dark:text-white"
-                      aria-label="Close menu"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-                  </Dialog.Close>
-                </div>
-
-                <SidebarInner onNavigate={() => setMobileOpen(false)} />
+              <div className="relative h-full">
+                <Dialog.Title className="sr-only">Navigation Menu</Dialog.Title>
+                <Dialog.Description className="sr-only">
+                  Access your dashboard, buy data, airtime, and manage your wallet.
+                </Dialog.Description>
+                <Dialog.Close asChild>
+                  <button 
+                    className="absolute top-5 right-5 p-2 rounded-xl bg-neutral-100 dark:bg-white/5 text-neutral-500 hover:bg-neutral-200 transition-colors"
+                    aria-label="Close menu"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </Dialog.Close>
+                <NavContent mobile />
               </div>
             </motion.div>
-
-            {/* click outside closes */}
-            <Dialog.Close asChild>
-              <button
-                aria-label="Close drawer overlay"
-                className="fixed inset-0 -z-10"
-              />
-            </Dialog.Close>
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
     </>
+  );
+}
+
+export function MobileSidebarTrigger({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="p-2 rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 md:hidden"
+    >
+      <Menu className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
+    </button>
   );
 }

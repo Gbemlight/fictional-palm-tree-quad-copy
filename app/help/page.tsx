@@ -14,7 +14,9 @@ import {
   Send,
   X,
   Bot,
-  User
+  User,
+  ExternalLink,
+  ArrowRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import DashboardLayout from "@/components/dashboard/layout";
@@ -55,13 +57,13 @@ const FAQS = [
   {
     id: "faq-1",
     category: "getting-started",
-    question: "How do I create a QuickPay account?",
-    answer: "Download the app or visit our website and click 'Sign Up'. You'll need a valid phone number and email address to verify your identity.",
+    question: "How do I create a Credixa account?",
+    answer: "Visit our website and click 'Sign Up'. You'll need a valid email address and phone number to verify your identity.",
   },
   {
     id: "faq-2",
     category: "payments",
-    question: "What bills can I pay with QuickPay?",
+    question: "What bills can I pay with Credixa?",
     answer: "You can pay for electricity (PHCN), Cable TV (DSTV/GOTV), Internet data, and Airtime for all major Nigerian networks.",
   },
   {
@@ -129,7 +131,7 @@ export default function HelpCenterPage() {
             icon={<Mail className="text-blue-500" />} 
             title="Email Support" 
             desc="Response within 24h"
-            action="Email Us"
+            action="Send Ticket"
           />
           <SupportCard 
             icon={<Phone className="text-emerald-500" />} 
@@ -138,9 +140,9 @@ export default function HelpCenterPage() {
             action="Call Now"
           />
           <SupportCard 
-            icon={<MessageCircle className="text-primary" />} 
+            icon={<MessageCircle className="text-indigo-600" />} 
             title="Live Chat" 
-            desc="Chat with our bot"
+            desc="Instant Assistance"
             action="Start Chat"
             onClick={() => setChatOpen(true)}
             highlight
@@ -148,16 +150,16 @@ export default function HelpCenterPage() {
         </div>
 
         {/* FAQ Section */}
-        <section className="space-y-8">
-          <div className="flex flex-wrap gap-2 justify-center">
+        <section className="space-y-10">
+          <div className="flex flex-wrap gap-2 justify-center border-b border-neutral-200 dark:border-white/5 pb-6">
             {CATEGORIES.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
                 className={cn(
-                  "px-5 py-2 rounded-full text-sm font-bold transition-all",
+                  "px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all",
                   activeCategory === cat.id 
-                    ? "bg-primary text-white shadow-lg shadow-primary/25" 
+                    ? "bg-linear-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25" 
                     : "bg-white dark:bg-neutral-900 text-neutral-500 hover:text-neutral-900 dark:hover:text-white border border-neutral-200 dark:border-white/10"
                 )}
               >
@@ -180,6 +182,13 @@ export default function HelpCenterPage() {
               <p className="text-center text-neutral-500 py-10">No questions found matching your search.</p>
             )}
           </div>
+
+          {/* Still Need Help Footer */}
+          <div className="p-10 rounded-[2.5rem] bg-neutral-900 dark:bg-white/5 text-center space-y-4">
+            <h2 className="text-2xl font-black text-white">Still didn't find what you need?</h2>
+            <p className="text-neutral-400 text-sm max-w-md mx-auto">Our dedicated support engineers are available 24/7 to help you resolve any issues with your account or wallet.</p>
+            <Button variant="primary" className="px-10 py-6 rounded-2xl">Contact Specialized Support</Button>
+          </div>
         </section>
       </div>
 
@@ -194,22 +203,22 @@ export default function HelpCenterPage() {
 function SupportCard({ icon, title, desc, action, onClick, highlight }: SupportCardProps) {
   return (
     <Card 
-      variant={highlight ? "elevated" : "default"}
+      variant="interactive" 
       className={cn(
-        "p-6 text-center space-y-4 cursor-pointer group hover:border-primary/50 transition-all rounded-4xl",
-        highlight && "border-primary/20 bg-primary/5"
+        "p-8 text-center space-y-4 cursor-pointer group transition-all rounded-[2.5rem] border-neutral-200 dark:border-white/5",
+        highlight && "border-indigo-500/30 bg-indigo-600/5 shadow-xl shadow-indigo-500/5"
       )}
       onClick={onClick}
     >
-      <div className="mx-auto w-12 h-12 rounded-2xl bg-neutral-100 dark:bg-white/5 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+      <div className="mx-auto w-16 h-16 rounded-2xl bg-neutral-100 dark:bg-white/5 flex items-center justify-center text-3xl group-hover:scale-110 transition-all duration-500 group-hover:rotate-3">
         {icon}
       </div>
       <div>
-        <h3 className="font-black text-neutral-900 dark:text-white uppercase tracking-wider text-xs mb-1">{title}</h3>
+        <h3 className="font-black text-neutral-900 dark:text-white uppercase tracking-widest text-[11px] mb-1">{title}</h3>
         <p className="text-xs text-neutral-500">{desc}</p>
       </div>
-      <Button variant={highlight ? "primary" : "secondary"} size="sm" className="w-full rounded-xl">
-        {action}
+      <Button variant={highlight ? "primary" : "secondary"} size="sm" className="w-full rounded-2xl font-bold py-5">
+        {action} {highlight ? <ArrowRight className="ml-2 h-3 w-3" /> : <ExternalLink className="ml-2 h-3 w-3 opacity-50" />}
       </Button>
     </Card>
   );
@@ -219,7 +228,7 @@ function FAQItem({ faq, isExpanded, onToggle }: FAQItemProps) {
   const [feedback, setFeedback] = React.useState<null | 'yes' | 'no'>(null);
 
   return (
-    <Card className="p-0 overflow-hidden border-neutral-200 dark:border-white/5 rounded-3xl">
+    <Card className="p-0 overflow-hidden border-neutral-200 dark:border-white/5 rounded-4xl bg-white/50 dark:bg-neutral-900/50 backdrop-blur-md hover:border-indigo-500/20 transition-colors">
       <button 
         onClick={onToggle}
         className="w-full p-6 flex items-center justify-between text-left group"
@@ -273,7 +282,7 @@ function FAQItem({ faq, isExpanded, onToggle }: FAQItemProps) {
 
 function ChatWidget({ onClose }: { onClose: () => void }) {
   const [messages, setMessages] = React.useState([
-    { role: 'bot', text: 'Hi! I am the QuickPay assistant. How can I help you today?' }
+    { role: 'bot', text: 'Hi! I am the Credixa assistant. How can I help you today?' }
   ]);
   const [input, setInput] = React.useState("");
   const [isTyping, setIsTyping] = React.useState(false);
@@ -295,9 +304,9 @@ function ChatWidget({ onClose }: { onClose: () => void }) {
     setTimeout(() => {
       let botText = "I'm not sure about that. Would you like me to connect you to a human agent?";
       const lower = input.toLowerCase();
-      if (lower.includes("hello") || lower.includes("hi")) botText = "Hello! I can help you with bill payments or wallet issues.";
-      if (lower.includes("wallet")) botText = "To fund your wallet, go to the Dashboard and click 'Add Money'.";
-      if (lower.includes("fail") || lower.includes("pending")) botText = "I'm sorry to hear that. Please provide your transaction reference (e.g., QKP-123456).";
+      if (lower.includes("hello") || lower.includes("hi")) botText = "Hello! I'm here to assist with Credixa bill payments or wallet management.";
+      if (lower.includes("wallet") || lower.includes("fund")) botText = "To fund your wallet, navigate to the Dashboard and click the 'Add Money' button.";
+      if (lower.includes("fail") || lower.includes("pending")) botText = "I'm sorry to hear about the delay. Please share your reference ID so I can investigate.";
       
       setMessages(prev => [...prev, { role: 'bot', text: botText }]);
       setIsTyping(false);
@@ -309,16 +318,16 @@ function ChatWidget({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
-      className="fixed bottom-6 right-6 z-100 w-95 h-137.5 max-w-[calc(100vw-2rem)] bg-white dark:bg-neutral-900 shadow-2xl rounded-3xl border border-neutral-200 dark:border-white/10 flex flex-col overflow-hidden"
+      className="fixed bottom-6 right-6 z-100 w-95 h-137.5 max-w-[calc(100vw-2rem)] bg-white dark:bg-neutral-950 shadow-2xl rounded-[2.5rem] border border-neutral-200 dark:border-white/10 flex flex-col overflow-hidden"
     >
       {/* Chat Header */}
-      <div className="p-4 bg-primary text-white flex items-center justify-between">
+      <div className="p-5 bg-linear-to-r from-indigo-600 to-violet-600 text-white flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-            <Bot size={20} />
+            <Bot size={22} />
           </div>
           <div>
-            <p className="font-black text-sm uppercase tracking-wider">QuickBot</p>
+            <p className="font-black text-sm uppercase tracking-wider">CredixaBot</p>
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
               <span className="text-[10px] font-bold opacity-80 uppercase">Online</span>
@@ -349,10 +358,10 @@ function ChatWidget({ onClose }: { onClose: () => void }) {
               {m.role === 'bot' ? <Bot size={14} /> : <User size={14} />}
             </div>
             <div className={cn(
-              "p-3.5 rounded-2xl text-sm max-w-[80%] font-medium",
+              "p-4 rounded-2xl text-sm max-w-[80%] font-medium",
               m.role === 'bot' 
                 ? "bg-neutral-100 dark:bg-white/5 text-neutral-900 dark:text-neutral-200 rounded-bl-none" 
-                : "bg-primary text-white rounded-br-none shadow-lg shadow-primary/20"
+                : "bg-linear-to-r from-indigo-600 to-violet-600 text-white rounded-br-none shadow-lg shadow-indigo-500/20"
             )}>
               {m.text}
             </div>
@@ -384,14 +393,14 @@ function ChatWidget({ onClose }: { onClose: () => void }) {
           className="relative"
         >
           <input 
-            className="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-2xl py-3 pl-4 pr-12 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            className="w-full bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 rounded-2xl py-4 pl-5 pr-14 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
             placeholder="Type a message..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
           />
           <button 
             type="submit"
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-primary text-white rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-2.5 bg-indigo-600 text-white rounded-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-indigo-500/20"
           >
             <Send size={16} />
           </button>

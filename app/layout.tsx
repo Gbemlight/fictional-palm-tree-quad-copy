@@ -1,6 +1,7 @@
-import { type ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { Providers } from "./providers";
 
@@ -15,17 +16,17 @@ const geistMono = Geist_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#7C3AED",
+  themeColor: "#4F46E5",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
-  title: "QuickPay - Your Payment Hub",
-  description: "Fast and secure mobile payments and financial management.",
+  title: "Credixa - Your Financial Hub",
+  description: "Fast and secure financial management for Credixa.",
   manifest: "/manifest.json", // Link to your PWA manifest
-  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'QuickPay' },
+  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Credixa' },
 };
 
 export default function RootLayout({
@@ -35,24 +36,24 @@ export default function RootLayout({
 }>) {
   return (
      <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                var prefs = JSON.parse(localStorage.getItem('prefs'));
-                var theme = prefs ? prefs.theme : 'dark';
-                if (theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                  document.documentElement.classList.add('dark');
-                } else {
-                  document.documentElement.classList.remove('dark');
-                }
-              } catch (e) {}
-            `,
-          }}
-        />
-      </head>
-      <body className="antialiased bg-white text-black dark:bg-black dark:text-white transition-colors duration-300">
+      <head />
+      <body className="antialiased bg-white text-black dark:bg-black dark:text-white transition-colors duration-300 overflow-x-hidden selection:bg-indigo-100 dark:selection:bg-indigo-500/30">
+        <Script
+          id="theme-initializer"
+          strategy="beforeInteractive"
+        >
+          {`
+            try {
+              var prefs = JSON.parse(localStorage.getItem('prefs'));
+              var theme = prefs ? prefs.theme : 'dark';
+              if (theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+              } else {
+                document.documentElement.classList.remove('dark');
+              }
+            } catch (e) {}
+          `}
+        </Script>
         <Providers>{children}</Providers>
       </body>
     </html>

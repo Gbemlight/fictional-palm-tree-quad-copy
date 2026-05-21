@@ -1,61 +1,65 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
+  ChevronLeft,
   ArrowRight,
-  Repeat2,
   Zap,
   Tv,
   Wifi,
   Droplets,
   Trash2,
   GraduationCap,
+  Bell,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import DashboardLayout from "@/components/dashboard/layout";
+import { cn } from "@/lib/utils";
 
 const billCategories = [
   {
     name: "Electricity",
+    sub: "Utility",
     href: "/pay-bills/electricity",
     icon: Zap,
-    gradient:
-      "bg-[linear-gradient(135deg,var(--color-warning),var(--color-secondary))]",
+    accent: "#F59E0B",
   },
   {
     name: "Cable TV",
+    sub: "Entertainment",
     href: "/pay-bills/cable",
     icon: Tv,
-    gradient:
-      "bg-[linear-gradient(135deg,var(--color-primary),var(--color-secondary))]",
+    accent: "#3B82F6",
   },
   {
     name: "Internet",
+    sub: "Connectivity",
     href: "/pay-bills/internet",
     icon: Wifi,
-    gradient:
-      "bg-[linear-gradient(135deg,var(--color-accent),var(--color-primary))]",
+    accent: "#D946EF",
   },
   {
     name: "Water",
+    sub: "Utility",
     href: "/pay-bills/water",
     icon: Droplets,
-    gradient:
-      "bg-[linear-gradient(135deg,var(--color-accent),var(--color-success))]",
+    accent: "#06B6D4",
   },
   {
     name: "Waste",
+    sub: "Utility",
     href: "/pay-bills/waste",
     icon: Trash2,
-    gradient:
-      "bg-[linear-gradient(135deg,var(--color-danger),var(--color-warning))]",
+    accent: "#F43F5E",
   },
   {
     name: "Education",
+    sub: "Institution",
     href: "/pay-bills/education",
     icon: GraduationCap,
-    gradient:
-      "bg-[linear-gradient(135deg,var(--color-success),var(--color-accent))]",
+    accent: "#10B981",
   },
 ];
 
@@ -82,84 +86,86 @@ const recentBills = [
 
 export default function PayBillsPage() {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#000000] px-4 py-8 md:px-8 md:py-10">
-      <div className="pointer-events-none absolute -top-40 left-1/2 h-125 w-125 -translate-x-1/2 rounded-full bg-purple-500/30 blur-[140px]" />
-
-      <div className="relative mx-auto max-w-6xl space-y-8">
+    <DashboardLayout>
+      <div className="max-w-4xl mx-auto space-y-10 pb-20">
         {/* Header */}
-        <section className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl md:p-8">
-          <h1 className="text-3xl font-bold text-white md:text-4xl">
-            Pay Bills
-          </h1>
-          <p className="mt-2 text-sm text-white/70 md:text-base">
-            Choose a bill category and complete payment in seconds.
-          </p>
-        </section>
+        <header className="space-y-4">
+          <Link 
+            href="/dashboard" 
+            className="group inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-400 hover:text-indigo-600 transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            Dashboard
+          </Link>
+          
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white md:text-4xl">
+              Pay Bills
+            </h1>
+            <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+              Settle utilities, subscriptions, and services instantly.
+            </p>
+          </div>
+        </header>
 
         {/* Banner */}
-        <section className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl shadow-[0_10px_40px_rgba(124,58,237,0.18)] md:p-8">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-sm font-medium uppercase tracking-wide text-white/60">
-                Coming soon
-              </p>
-              <h2 className="mt-1 text-2xl font-bold text-white">
+        <section className="relative overflow-hidden rounded-[2.5rem] bg-indigo-600 p-8 md:p-10 text-white shadow-2xl shadow-indigo-500/20">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-lg">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-[10px] font-bold uppercase tracking-widest">
+                <Bell size={12} className="animate-bounce" /> Coming Soon
+              </div>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
                 Automate your bills
               </h2>
-              <p className="mt-2 max-w-2xl text-sm text-white/70">
-                Set recurring payments for utility bills and subscriptions so
-                you never miss a due date.
+              <p className="text-indigo-100 text-sm md:text-base font-medium opacity-90">
+                Set recurring payments for utilities and subscriptions so you never miss a deadline again.
               </p>
             </div>
-
-            <Button className="md:w-auto">Get Notified</Button>
+            <Button variant="secondary" className="h-14 px-8 rounded-2xl shadow-lg hover:scale-105 transition-transform">
+              Get Notified
+            </Button>
           </div>
+          {/* Abstract Background Element */}
+          <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
         </section>
 
         {/* Categories */}
-        <section className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl md:p-8">
+        <section className="space-y-6">
           <div className="mb-5">
-            <h2 className="text-2xl font-semibold text-white">
-              Bill categories
+            <h2 className="text-xl font-bold text-neutral-900 dark:text-white">
+              Service Categories
             </h2>
-            <p className="mt-1 text-sm text-white/70">
-              Pick a category to continue to provider selection.
-            </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {billCategories.map((category) => {
               const Icon = category.icon;
 
               return (
-                <motion.div
+                <motion.div 
                   key={category.name}
-                  whileHover={{ y: -6, scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
+                  whileHover={{ y: -5 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   <Link
                     href={category.href}
-                    className="group block rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl shadow-[0_10px_30px_rgba(124,58,237,0.14)] transition hover:shadow-[0_18px_45px_rgba(124,58,237,0.24)] focus:outline-none focus:ring-2 focus:ring-accent/50"
+                    className="group relative flex flex-col items-center justify-center min-h-48 rounded-[2.5rem] p-6 bg-white dark:bg-neutral-900 border-2 border-neutral-100 dark:border-white/5 hover:border-indigo-600 dark:hover:border-indigo-500 shadow-sm transition-all duration-300"
                   >
-                    <div
-                      className={`mb-5 flex h-16 w-16 items-center justify-center rounded-2xl text-white shadow-lg ${category.gradient}`}
+                    <div 
+                      className="relative z-10 mb-5 rounded-2xl p-4 shadow-sm border border-neutral-50 dark:border-white/5 bg-neutral-50 dark:bg-white/5 transition-transform group-hover:scale-110 duration-500"
+                      style={{ color: category.accent }}
                     >
-                      <motion.div
-                        whileHover={{ rotate: -8 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Icon className="h-8 w-8" />
-                      </motion.div>
+                      <Icon size={32} />
                     </div>
 
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <h3 className="text-base font-semibold text-white md:text-lg">
-                          {category.name}
-                        </h3>
-                      </div>
-
-                      <ArrowRight className="h-5 w-5 text-white/75 transition group-hover:translate-x-1 group-hover:text-white" />
+                    <div className="text-center space-y-1">
+                      <span className="block font-bold text-lg tracking-tight text-neutral-900 dark:text-white">
+                        {category.name}
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">
+                        {category.sub}
+                      </span>
                     </div>
                   </Link>
                 </motion.div>
@@ -169,46 +175,46 @@ export default function PayBillsPage() {
         </section>
 
         {/* Recent bills */}
-        <section className="rounded-3xl border border-white/15 bg-white/10 p-6 backdrop-blur-xl md:p-8">
+        <section className="space-y-6">
           <div className="mb-5">
-            <h2 className="text-2xl font-semibold text-white">
-              Recent bills
+            <h2 className="text-xl font-bold text-neutral-900 dark:text-white">
+              Recent Activity
             </h2>
-            <p className="mt-1 text-sm text-white/70">
-              Quickly repeat your recent bill payments.
-            </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {recentBills.map((bill) => (
-              <div
+              <motion.div
                 key={bill.id}
-                className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-black/20 p-4 md:flex-row md:items-center md:justify-between"
+                whileHover={{ x: 5 }}
+                className="flex items-center gap-4 p-4 md:p-5 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 shadow-sm rounded-3xl"
               >
-                <div>
-                  <p className="text-base font-semibold text-white">
+                <div className="h-12 w-12 shrink-0 rounded-2xl bg-neutral-50 dark:bg-white/5 flex items-center justify-center border border-neutral-100 dark:border-white/10">
+                  <Calendar className="h-5 w-5 text-indigo-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="truncate text-base font-bold text-neutral-900 dark:text-white">
                     {bill.title}
                   </p>
-                  <p className="text-sm text-white/60">{bill.category}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-neutral-400">
+                    {bill.category}
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-4">
-                  <p className="text-lg font-bold text-white">
+                <div className="flex items-center gap-6">
+                  <p className="text-lg font-bold text-neutral-900 dark:text-white tracking-tight">
                     ₦{bill.amount.toLocaleString()}
                   </p>
 
-                  <Button
-                    variant="secondary"
-                    leftIcon={<Repeat2 className="h-4 w-4" />}
-                  >
-                    Pay Again
-                  </Button>
+                  <button className="h-10 w-10 rounded-full flex items-center justify-center bg-neutral-50 dark:bg-white/5 hover:bg-linear-to-r hover:from-indigo-600 hover:to-violet-600 hover:text-white transition-all">
+                    <ArrowRight size={18} />
+                  </button>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>
       </div>
-    </main>
+    </DashboardLayout>
   );
 }

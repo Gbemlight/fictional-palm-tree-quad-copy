@@ -21,11 +21,11 @@ const paddingMap: Record<CardPadding, string> = {
 
 const variantMap: Record<CardVariant, string> = {
   default:
-    "backdrop-blur-lg bg-white/10 border border-white/20",
+    "backdrop-blur-md bg-white/50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5",
   elevated:
-    "backdrop-blur-lg bg-white/10 border border-white/20 shadow-[0_20px_40px_rgba(124,58,237,0.15)]",
+    "backdrop-blur-md bg-white/50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 shadow-[0_20px_40px_rgba(124,58,237,0.15)]",
   interactive:
-    "backdrop-blur-lg bg-white/10 border border-white/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(236,72,153,0.18)] hover:border-white/30",
+    "backdrop-blur-md bg-white/50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-white/5 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(236,72,153,0.18)] hover:border-primary/50",
   outline:
     "bg-transparent border border-white/25",
 };

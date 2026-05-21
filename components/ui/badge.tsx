@@ -27,32 +27,32 @@ const variantMap: Record<
   success: {
     text: "text-white",
     bg: "bg-[linear-gradient(135deg,rgba(132,204,22,0.95),rgba(6,182,212,0.35))]",
-    ring: "ring-1 ring-white/15",
-    dot: "bg-[var(--color-success)]",
+    ring: "ring-1 ring-green-500/20",
+    dot: "bg-green-500",
   },
   pending: {
     text: "text-white",
     bg: "bg-[linear-gradient(135deg,rgba(245,158,11,0.95),rgba(236,72,153,0.35))]",
-    ring: "ring-1 ring-white/15",
-    dot: "bg-[var(--color-warning)]",
+    ring: "ring-1 ring-amber-500/20",
+    dot: "bg-amber-500",
   },
   failed: {
     text: "text-white",
     bg: "bg-[linear-gradient(135deg,rgba(239,68,68,0.95),rgba(124,58,237,0.35))]",
-    ring: "ring-1 ring-white/15",
-    dot: "bg-[var(--color-danger)]",
+    ring: "ring-1 ring-red-500/20",
+    dot: "bg-red-500",
   },
   info: {
     text: "text-white",
     bg: "bg-[linear-gradient(135deg,rgba(6,182,212,0.95),rgba(124,58,237,0.35))]",
-    ring: "ring-1 ring-white/15",
-    dot: "bg-[var(--color-accent)]",
+    ring: "ring-1 ring-cyan-500/20",
+    dot: "bg-cyan-500",
   },
   neutral: {
     text: "text-gray-800",
     bg: "bg-[linear-gradient(135deg,rgba(243,244,246,0.95),rgba(229,231,235,0.9))]",
-    ring: "ring-1 ring-black/10",
-    dot: "bg-gray-500",
+    ring: "ring-1 ring-neutral-300/50",
+    dot: "bg-neutral-500",
   },
 };
 

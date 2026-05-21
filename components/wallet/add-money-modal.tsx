@@ -373,6 +373,7 @@ export function AddMoneyModal({
                 onClick={handleProceed}
                 loading={loading}
                 fullWidth
+                className="bg-linear-to-r from-indigo-600 to-violet-600 border-none text-white hover:opacity-90"
               >
                 Proceed
               </Button>

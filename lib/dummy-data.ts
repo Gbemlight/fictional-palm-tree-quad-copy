@@ -28,8 +28,8 @@ export type Transaction = {
 
 export const mockUser = {
   id: "user_001",
-  name: "Sadiq Ahmad",
-  email: "sadiq@quickpay.app",
+  name: "Adeyanju Oluwadamilare",
+  email: "oluwadamilare@quickpay.app",
   phone: "+2348012345678",
   walletBalance: 125000,
   currency: "NGN",

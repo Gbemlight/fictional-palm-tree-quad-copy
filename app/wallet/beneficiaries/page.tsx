@@ -381,7 +381,7 @@ export default function BeneficiariesPage() {
             </div>
 
             <div className="hidden md:block">
-              <Button leftIcon={<UserPlus className="h-4 w-4" />} onClick={openAdd}>
+              <Button className="bg-linear-to-r from-indigo-600 to-violet-600 border-none text-white hover:opacity-90" leftIcon={<UserPlus className="h-4 w-4" />} onClick={openAdd}>
                 Add Beneficiary
               </Button>
             </div>
@@ -561,7 +561,7 @@ export default function BeneficiariesPage() {
           <Button variant="secondary" onClick={() => setModalOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={submitForm}>
+          <Button className="bg-linear-to-r from-indigo-600 to-violet-600 border-none text-white hover:opacity-90" onClick={submitForm}>
             {editingId ? "Save Changes" : "Add Beneficiary"}
           </Button>
         </DialogFooter>
