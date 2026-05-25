@@ -35,10 +35,14 @@ const navItems = [
   { label: "Help", href: "/help", icon: HelpCircle }, // Added Help item
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  isMobileOpen: boolean;
+  setIsMobileOpen: (open: boolean) => void;
+}
+
+export function Sidebar({ isMobileOpen, setIsMobileOpen }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = React.useState(false);
-  const [isMobileOpen, setIsMobileOpen] = React.useState(false);
 
   // Load and persist sidebar state
   React.useEffect(() => {
@@ -56,7 +60,7 @@ export function Sidebar() {
     <div className="flex flex-col h-full bg-white dark:bg-neutral-950">
       {/* Logo Section */}
       <div className={cn(
-        "p-6 flex items-center gap-3 transition-all duration-300",
+        "p-5 md:p-6 flex items-center gap-3 transition-all duration-300",
         isCollapsed && !mobile ? "justify-center" : "justify-start"
       )}>
         <div className="w-10 h-10 bg-linear-to-tr from-indigo-600 to-violet-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
@@ -77,7 +81,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex-1 px-4 space-y-2 mt-4">
+      <nav className="flex-1 px-3 md:px-4 space-y-1 md:space-y-2 mt-2 md:mt-4 overflow-y-auto scrollbar-hide">
         {navItems.map((item) => {
           // Professional active check: matches exact path OR sub-paths (except for home)
           const isActive = pathname === item.href || 
@@ -89,7 +93,7 @@ export function Sidebar() {
               href={item.href}
               onClick={() => mobile && setIsMobileOpen(false)}
               className={cn(
-                "relative flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 group overflow-hidden",
+                "relative flex items-center gap-3 px-3 py-2.5 md:py-3 rounded-xl transition-all duration-300 group overflow-hidden",
                 isActive 
                   ? "bg-linear-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/20" 
                   : "text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-white/5 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(99,102,241,0.1)]",
@@ -117,7 +121,7 @@ export function Sidebar() {
 
       {/* User Profile Section */}
       <div className={cn(
-        "p-4 border-t border-neutral-100 dark:border-white/5",
+        "p-3 md:p-4 border-t border-neutral-100 dark:border-white/5",
         isCollapsed && !mobile ? "flex justify-center" : ""
       )}>
         <div className={cn(
@@ -146,10 +150,15 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
+      <motion.div
+        initial={false}
+        animate={{ width: isCollapsed ? 80 : 280 }}
+        className="hidden md:block shrink-0"
+      />
       <motion.aside
         initial={false} // Ensures Framer Motion doesn't animate on initial render
         animate={{ width: isCollapsed ? 80 : 280 }}
-        className="hidden md:flex flex-col sticky top-0 h-screen z-40 bg-white dark:bg-neutral-950 border-r border-transparent group overflow-hidden"
+        className="hidden md:flex flex-col fixed left-0 top-0 h-screen z-40 bg-white dark:bg-neutral-950 border-r border-transparent group overflow-hidden"
       >
         {/* Right edge gradient border */}
         <div className="absolute top-0 right-0 h-full w-px bg-linear-to-b from-transparent via-neutral-200 dark:via-white/10 to-transparent" />
@@ -170,19 +179,6 @@ export function Sidebar() {
           </motion.div>
         </button>
       </motion.aside>
-
-      {/* Mobile Trigger - This would typically be in the Header component, 
-          but we'll include it here or assume layout handles it */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
-        <Button 
-          variant="outline" 
-          size="icon" 
-          className="rounded-xl bg-linear-to-r from-indigo-600 to-violet-600 border-none shadow-lg text-white hover:opacity-90 transition-opacity"
-          onClick={() => setIsMobileOpen(true)}
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-      </div>
 
       {/* Mobile Drawer (Radix Dialog) */}
       <Dialog.Root open={isMobileOpen} onOpenChange={setIsMobileOpen}>
@@ -205,7 +201,7 @@ export function Sidebar() {
                 </Dialog.Description>
                 <Dialog.Close asChild>
                   <button 
-                    className="absolute top-5 right-5 p-2 rounded-xl bg-neutral-100 dark:bg-white/5 text-neutral-500 hover:bg-neutral-200 transition-colors"
+                    className="absolute top-6 right-6 p-2.5 rounded-2xl bg-neutral-100 dark:bg-white/5 text-neutral-500 hover:bg-neutral-200 dark:hover:bg-white/10 transition-colors"
                     aria-label="Close menu"
                   >
                     <X className="h-5 w-5" />
@@ -223,11 +219,13 @@ export function Sidebar() {
 
 export function MobileSidebarTrigger({ onClick }: { onClick: () => void }) {
   return (
-    <button
+    <motion.button
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
       onClick={onClick}
-      className="p-2 rounded-xl bg-white dark:bg-white/5 border border-neutral-200 dark:border-white/10 md:hidden"
+      className="p-2.5 rounded-2xl bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-neutral-200/50 dark:border-white/10 shadow-lg shadow-black/5 md:hidden transition-colors"
     >
-      <Menu className="h-5 w-5 text-neutral-600 dark:text-neutral-400" />
-    </button>
+      <Menu className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+    </motion.button>
   );
 }

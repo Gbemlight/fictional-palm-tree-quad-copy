@@ -54,8 +54,26 @@
   --gradient-lime-cyan: linear-gradient(135deg, #84cc16, #06b6d4);
 }
 
-/* Base typography */
+/* Base typography and scroll behavior */
+html,
+body {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+}
+
+html {
+  /* Stops the browser from navigating back/forward on scroll bounce */
+  overscroll-behavior-y: contain;
+  /* Fix for mobile viewports */
+  height: -webkit-fill-available;
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: Inter, system-ui, sans-serif;
   font-size: var(--text-body);
+  /* Use dynamic viewport height to account for mobile address bars */
+  min-height: 100vh;
+  min-height: 100dvh;
+  -webkit-overflow-scrolling: touch;
 }

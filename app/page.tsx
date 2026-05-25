@@ -56,7 +56,7 @@ export default function Home() {
           </div>
 
           {/* Footer Preview Info */}
-          <div className="pt-10">
+          <div className="pt-7">
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 dark:text-neutral-600">
               V1.0.4 PROD • Secure & Encrypted
             </p>

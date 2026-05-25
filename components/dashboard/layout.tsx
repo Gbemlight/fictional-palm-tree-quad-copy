@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
-import { Sidebar } from "./sidebar";
+import { Sidebar, MobileSidebarTrigger } from "./sidebar";
 import { DashboardHeader } from "./header";
 import { ToastProvider } from "@/components/ui/toast";
 import { Toaster } from "@/components/ui/toaster";
@@ -15,6 +15,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const y = useMotionValue(0);
   const pullThreshold = 80;
   const pathname = usePathname();
+  const [isMobileOpen, setIsMobileOpen] = React.useState(false);
   
   // Map the drag distance to opacity and rotation for the loading icon
   const opacity = useTransform(y, [0, pullThreshold], [0, 1]);
@@ -32,7 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <ToastProvider>
       <div className="flex min-h-screen bg-neutral-50 dark:bg-neutral-950 transition-colors duration-300">
-        <Sidebar />
+        <Sidebar isMobileOpen={isMobileOpen} setIsMobileOpen={setIsMobileOpen} />
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
           {/* Pull-to-refresh Indicator */}
           <motion.div 
@@ -44,15 +45,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </motion.div>
           </motion.div>
 
-          <DashboardHeader />
-          <motion.main 
+          {/* Header Wrapper with Mobile Trigger Integration */}
+          <div className="relative group/header">
+            <div className="md:hidden absolute left-3 top-1/2 -translate-y-1/2 z-40">
+              <MobileSidebarTrigger onClick={() => setIsMobileOpen(true)} />
+            </div>
+            <div className="pl-14 md:pl-0">
+              <DashboardHeader />
+            </div>
+          </div>
+
+          <motion.main
             ref={scrollContainerRef}
-            drag="y"
-            dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={0.5}
-            onDragEnd={handleDragEnd}
-            style={{ y }}
-            className="flex-1 px-4 py-8 md:px-8 lg:px-12 overflow-y-auto scrollbar-hide pb-24 md:pb-8"
+            className="flex-1 px-3 py-6 md:px-8 lg:px-12 overflow-y-auto scrollbar-hide pb-24 md:pb-8"
           >
             <AnimatePresence mode="wait">
               <motion.div
